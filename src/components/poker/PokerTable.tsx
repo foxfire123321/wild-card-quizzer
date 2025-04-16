@@ -27,7 +27,7 @@ interface PokerTableProps {
 const tablePositions = [
   { x: 50, y: 85 },  // Bottom (user)
   { x: 90, y: 75 },  // Bottom right - moved 10% right
-  { x: 75, y: 25 },  // Top right
+  { x: 85, y: 35 },  // Top right
   { x: 50, y: 15 },  // Top
   { x: 15, y: 25 },  // Top left - moved 10% left
   { x: 15, y: 65 }   // Bottom left - moved 10% left
