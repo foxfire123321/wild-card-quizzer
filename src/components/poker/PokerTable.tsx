@@ -23,14 +23,14 @@ interface PokerTableProps {
   visibleOpponents: number[];
 }
 
-// Define table positions around the oval
+// Define table positions around the oval - adjusted to match screenshot
 const tablePositions = [
-  { x: 50, y: 80 },  // Bottom
-  { x: 75, y: 65 },  // Bottom right
-  { x: 75, y: 35 },  // Top right
-  { x: 50, y: 20 },  // Top
-  { x: 25, y: 35 },  // Top left
-  { x: 25, y: 65 }   // Bottom left
+  { x: 50, y: 85 },  // Bottom (user)
+  { x: 85, y: 65 },  // Bottom right - moved 10% right
+  { x: 75, y: 25 },  // Top right
+  { x: 50, y: 15 },  // Top
+  { x: 15, y: 25 },  // Top left - moved 10% left
+  { x: 15, y: 65 }   // Bottom left - moved 10% left
 ];
 
 // Map positions to indices on the table (clockwise, starting from bottom)
@@ -72,7 +72,7 @@ const PokerTable: React.FC<PokerTableProps> = ({
 
   return (
     <div className="relative w-full h-56 sm:h-64 md:h-72 lg:h-80 mb-4">
-      {/* Oval table */}
+      {/* Oval table - updated with more pronounced oval shape */}
       <div className="absolute inset-5 rounded-full poker-table"></div>
       
       {/* User's position and cards at the bottom */}

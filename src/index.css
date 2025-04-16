@@ -104,19 +104,19 @@
 
 /* Quiz theme */
 .quiz-theme {
-  @apply bg-gray-900 text-gray-100;
+  @apply bg-[#1a1a1a] text-gray-100;
 }
 
 .quiz-theme .poker-table {
-  @apply bg-poker-green border-4 border-poker-brown;
+  @apply bg-[#0c5124] border-8 border-[#593018] shadow-xl;
 }
 
 .quiz-theme .btn-answer {
-  @apply bg-amber-400 text-black hover:bg-amber-500;
+  @apply bg-yellow-400 text-black hover:bg-yellow-500;
 }
 
 .quiz-theme .btn-nav {
-  @apply border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-black;
+  @apply border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black;
 }
 
 /* Make sure content is never clipped and maintains proper responsive sizing */
