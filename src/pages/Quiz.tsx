@@ -38,12 +38,12 @@ const positionToIndex: Record<string, number> = {
 
 // Define table positions around the oval
 const tablePositions = [
-  { x: 50, y: 80, label: 'BTN' },  // Bottom
-  { x: 75, y: 65, label: 'SB' },   // Bottom right
-  { x: 75, y: 35, label: 'BB' },   // Top right
-  { x: 50, y: 20, label: 'UTG' },  // Top
-  { x: 25, y: 35, label: 'HJ' },   // Top left
-  { x: 25, y: 65, label: 'CO' }    // Bottom left
+  { x: 50, y: 80 },  // Bottom
+  { x: 75, y: 65 },  // Bottom right
+  { x: 75, y: 35 },  // Top right
+  { x: 50, y: 20 },  // Top
+  { x: 25, y: 35 },  // Top left
+  { x: 25, y: 65 }   // Bottom left
 ];
 
 const Quiz = () => {
@@ -55,6 +55,7 @@ const Quiz = () => {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
   const [userPosition, setUserPosition] = useState("BTN");
+  const [visibleOpponents, setVisibleOpponents] = useState<number[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -92,12 +93,42 @@ const Quiz = () => {
     }
   };
 
-  // When current question changes, update the user position
+  // When current question changes, update the user position and reset visible opponents
   useEffect(() => {
     if (questions.length > 0 && currentQuestionIndex < questions.length) {
       extractUserPosition(questions[currentQuestionIndex].question);
+      setVisibleOpponents([]); // Reset visible opponents for the new question
     }
   }, [currentQuestionIndex, questions]);
+
+  // Animate opponent actions appearance
+  useEffect(() => {
+    if (questions.length > 0 && currentQuestionIndex < questions.length) {
+      const currentQuestion = questions[currentQuestionIndex];
+      if (!currentQuestion.opponent_actions) return;
+
+      const orderedActions = getOrderedOpponentActions(
+        currentQuestion.opponent_actions,
+        userPosition
+      );
+
+      // Clear any existing timeouts
+      const timeoutIds: number[] = [];
+      
+      // Show opponents one by one with delay
+      orderedActions.forEach((_, index) => {
+        const timeoutId = window.setTimeout(() => {
+          setVisibleOpponents(prev => [...prev, index]);
+        }, 200 * index); // 0.2 second delay between each
+        timeoutIds.push(timeoutId);
+      });
+
+      // Cleanup function to clear timeouts if component unmounts or question changes
+      return () => {
+        timeoutIds.forEach(id => window.clearTimeout(id));
+      };
+    }
+  }, [currentQuestionIndex, questions, userPosition]);
 
   const handleAnswerSelect = (answer: string) => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -116,6 +147,7 @@ const Quiz = () => {
         setCurrentQuestionIndex(prevIndex => prevIndex + 1);
         setSelectedAnswer(null);
         setIsCorrect(null);
+        setVisibleOpponents([]); // Reset visible opponents for the new question
       } else {
         // Quiz completed - could navigate to a results page
         console.log("Quiz completed!");
@@ -215,7 +247,6 @@ const Quiz = () => {
           {/* User's position and cards at the bottom */}
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
             {renderCards(currentQuestion.cards?.player, true)}
-            <div className="mt-1 text-sm font-bold">{userPosition}</div>
           </div>
           
           {/* Community cards in the middle */}
@@ -224,16 +255,19 @@ const Quiz = () => {
           {/* Opponents around the table */}
           {tablePositions.map((pos, index) => {
             // Skip the user's position
-            if (pos.label === userPosition) return null;
+            if (index === positionToIndex[userPosition]) return null;
             
             // Find the opponent action for this position
             const opponentActionIndex = orderedOpponentActions.findIndex(
-              action => action?.position === pos.label
+              action => action?.position === Object.keys(positionToIndex).find(
+                key => positionToIndex[key] === index
+              )
             );
             
-            const opponentAction = opponentActionIndex >= 0 
-              ? orderedOpponentActions[opponentActionIndex] 
-              : null;
+            if (opponentActionIndex < 0) return null;
+            
+            const opponentAction = orderedOpponentActions[opponentActionIndex];
+            const isVisible = visibleOpponents.includes(opponentActionIndex);
             
             if (!opponentAction) return null;
             
@@ -247,12 +281,13 @@ const Quiz = () => {
                   transform: 'translate(-50%, -50%)' 
                 }}
               >
-                <div className="bg-amber-300 px-2 py-1 rounded-md text-xs mb-1 min-w-20 text-center">
-                  {opponentAction.action}
-                </div>
+                {isVisible && (
+                  <div className="bg-amber-300 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md text-xs mb-1 min-w-16 sm:min-w-20 text-center animate-fade-in">
+                    {opponentAction.action}
+                  </div>
+                )}
                 <div className="flex flex-col items-center">
                   {renderCards(['', ''])}
-                  <div className="mt-1 text-xs font-medium">{pos.label}</div>
                 </div>
               </div>
             );
