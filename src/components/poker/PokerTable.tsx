@@ -26,7 +26,7 @@ interface PokerTableProps {
 // Define table positions around the oval - adjusted to match screenshot
 const tablePositions = [
   { x: 50, y: 85 },  // Bottom (user)
-  { x: 95, y: 55 },  // Bottom right - moved 10% right
+  { x: 75, y: 75 },  // Bottom right - moved 10% right
   { x: 75, y: 25 },  // Top right
   { x: 50, y: 15 },  // Top
   { x: 15, y: 25 },  // Top left - moved 10% left
