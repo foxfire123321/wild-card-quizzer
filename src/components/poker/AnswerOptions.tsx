@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
 
 interface AnswerOptionsProps {
   options: string[];
@@ -16,27 +15,29 @@ const AnswerOptions: React.FC<AnswerOptionsProps> = ({
   isCorrect, 
   onAnswerSelect 
 }) => {
+  // Function to determine button styling based on selection state
+  const getButtonClass = (option: string) => {
+    if (!selectedAnswer) return "btn-answer";
+    
+    if (option === selectedAnswer) {
+      return isCorrect 
+        ? "bg-green-500 text-white hover:bg-green-600" 
+        : "bg-red-500 text-white hover:bg-red-600";
+    }
+    
+    return "btn-answer opacity-70";
+  };
+  
   return (
-    <div className="grid grid-cols-2 gap-3 mb-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
       {options.map((option, index) => (
         <Button
-          key={index}
-          onClick={() => onAnswerSelect(option)}
-          disabled={selectedAnswer !== null}
-          className={`h-14 text-lg transition-colors ${
-            selectedAnswer === option 
-              ? isCorrect 
-                ? 'bg-green-600 hover:bg-green-700' 
-                : 'bg-red-600 hover:bg-red-700'
-              : 'bg-poker-gold hover:bg-amber-600'
-          }`}
+          key={`option-${index}`}
+          className={getButtonClass(option)}
+          onClick={() => !selectedAnswer && onAnswerSelect(option)}
+          disabled={!!selectedAnswer}
         >
           {option}
-          {selectedAnswer === option && (
-            <span className="ml-2">
-              {isCorrect ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
-            </span>
-          )}
         </Button>
       ))}
     </div>

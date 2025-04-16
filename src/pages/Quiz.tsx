@@ -85,7 +85,7 @@ const Quiz = () => {
 
     return (
       <div className="w-full h-full flex flex-col items-center">
-        <h1 className="text-2xl font-bold text-blue-600 mb-2">Poker Quiz</h1>
+        <h1 className="text-2xl font-bold text-amber-400 mb-2">Poker Quiz</h1>
         
         {/* Poker table with cards and actions */}
         <PokerTable 
@@ -109,12 +109,12 @@ const Quiz = () => {
           />
           
           <div className="flex justify-between items-center">
-            <div className="text-lg font-bold">
+            <div className="text-lg font-bold text-amber-400">
               Score: {score}/{currentQuestionIndex + (isCorrect ? 1 : 0)}
             </div>
             <Button 
               variant="outline" 
-              className="border-poker-gold text-poker-gold hover:bg-poker-gold hover:text-white"
+              className="btn-nav"
               onClick={() => navigate('/')}
             >
               Back to Home
@@ -126,18 +126,18 @@ const Quiz = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 p-4 md:p-8">
+    <div className="min-h-screen quiz-theme p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin h-10 w-10 border-4 border-poker-gold border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading questions...</p>
+            <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading questions...</p>
           </div>
         ) : error ? (
           <div className="text-center py-12">
             <p className="text-red-500">{error}</p>
             <Button 
-              className="mt-4 bg-poker-gold hover:bg-amber-600"
+              className="mt-4 bg-amber-400 hover:bg-amber-500 text-black"
               onClick={() => window.location.reload()}
             >
               Try Again

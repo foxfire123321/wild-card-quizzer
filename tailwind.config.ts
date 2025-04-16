@@ -64,6 +64,8 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				'poker-gold': '#B67D24',
+				'poker-green': '#0D5D33',
+				'poker-brown': '#5D341A',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -86,11 +88,35 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0'
+					},
+					'100%': {
+						opacity: '1'
+					}
+				},
+				'fold-cards': {
+					'0%': {
+						transform: 'rotate(0deg) translateX(0)',
+						opacity: '1'
+					},
+					'50%': {
+						transform: 'rotate(15deg) translateX(10px)',
+						opacity: '0.5'
+					},
+					'100%': {
+						transform: 'rotate(30deg) translateX(20px)',
+						opacity: '0'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-in-out',
+				'fold-cards': 'fold-cards 0.5s ease-in-out forwards'
 			}
 		}
 	},

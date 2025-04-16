@@ -73,7 +73,7 @@ const PokerTable: React.FC<PokerTableProps> = ({
   return (
     <div className="relative w-full h-56 sm:h-64 md:h-72 lg:h-80 mb-4">
       {/* Oval table */}
-      <div className="absolute inset-5 rounded-full bg-poker-gold border-4 border-amber-800"></div>
+      <div className="absolute inset-5 rounded-full poker-table"></div>
       
       {/* User's position and cards at the bottom */}
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
