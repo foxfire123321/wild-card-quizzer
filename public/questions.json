@@ -1,21 +1,490 @@
 
 [
-  {
-    "id": 1,
-    "text": "What is the highest hand in poker?",
-    "options": ["Full House", "Straight", "Royal Flush", "Four of a Kind"],
-    "correctAnswer": "Royal Flush"
-  },
-  {
-    "id": 2,
-    "text": "How many cards are in a standard deck?",
-    "options": ["48", "52", "54", "50"],
-    "correctAnswer": "52"
-  },
-  {
-    "id": 3,
-    "text": "Which of these is NOT a poker variant?",
-    "options": ["Texas Hold'em", "Omaha", "Blackjack", "Seven-Card Stud"],
-    "correctAnswer": "Blackjack"
-  }
+    {
+        "id": 0,
+        "question": "You have A♠ K♠ in BTN—best move?",
+        "options": ["Raise", "Call", "Fold", "Check"],
+        "answer": "Raise",
+        "opponent_actions": [
+            {"position": "SB", "action": "folds"},
+            {"position": "BB", "action": "calls $2"},
+            {"position": "UTG", "action": "folds"},
+            {"position": "HJ", "action": "folds"},
+            {"position": "CO", "action": "folds"}
+        ],
+        "cards": {
+            "player": ["A♠", "K♠"],
+            "flop": [],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 1,
+        "question": "You have 7♦ 7♣ in UTG, flop is 7♠ 3♥ K♦—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["7♦", "7♣"],
+            "flop": ["7♠", "3♥", "K♦"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 2,
+        "question": "You have 9♠ 8♠ in HJ—best move?",
+        "options": ["Raise", "Call", "Fold", "Check"],
+        "answer": "Raise",
+        "opponent_actions": [
+            {"position": "SB", "action": "folds"},
+            {"position": "BB", "action": "calls $2"},
+            {"position": "UTG", "action": "folds"}
+        ],
+        "cards": {
+            "player": ["9♠", "8♠"],
+            "flop": [],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 3,
+        "question": "You have A♣ Q♣ in CO, flop is K♠ 4♣ 9♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"},
+            {"position": "UTG", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["A♣", "Q♣"],
+            "flop": ["K♠", "4♣", "9♣"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 4,
+        "question": "You have 5♥ 4♥ in BTN, flop is 6♠ 7♥ 2♦—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["5♥", "4♥"],
+            "flop": ["6♠", "7♥", "2♦"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 5,
+        "question": "You have J♠ T♠ in BB, flop is Q♣ 9♠ 2♦—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Check",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["J♠", "T♠"],
+            "flop": ["Q♣", "9♠", "2♦"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 6,
+        "question": "You have 4♣ 4♦ in HJ, flop is 4♠ 8♥ K♣, turn is 3♠—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["4♣", "4♦"],
+            "flop": ["4♠", "8♥", "K♣"],
+            "turn": "3♠",
+            "river": null
+        }
+    },
+    {
+        "id": 7,
+        "question": "You have A♥ K♠ in UTG, flop is A♠ 7♣ 4♦, turn is 9♠, river is 2♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["A♥", "K♠"],
+            "flop": ["A♠", "7♣", "4♦"],
+            "turn": "9♠",
+            "river": "2♣"
+        }
+    },
+    {
+        "id": 8,
+        "question": "You have Q♦ J♦ in CO, flop is K♣ T♦ 5♠—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"},
+            {"position": "UTG", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["Q♦", "J♦"],
+            "flop": ["K♣", "T♦", "5♠"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 9,
+        "question": "You have 6♠ 5♠ in BTN, flop is 8♣ 7♠ 2♥, turn is T♠—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["6♠", "5♠"],
+            "flop": ["8♣", "7♠", "2♥"],
+            "turn": "T♠",
+            "river": null
+        }
+    },
+    {
+        "id": 10,
+        "question": "You have K♣ Q♠ in UTG—best move?",
+        "options": ["Raise", "Call", "Fold", "Check"],
+        "answer": "Raise",
+        "opponent_actions": [
+            {"position": "SB", "action": "folds"},
+            {"position": "BB", "action": "calls $2"}
+        ],
+        "cards": {
+            "player": ["K♣", "Q♠"],
+            "flop": [],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 11,
+        "question": "You have 8♥ 8♣ in HJ, flop is 8♦ 2♠ 5♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["8♥", "8♣"],
+            "flop": ["8♦", "2♠", "5♣"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 12,
+        "question": "You have A♦ J♥ in CO, flop is Q♠ 7♦ 3♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Check",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "bets $10"},
+            {"position": "UTG", "action": "folds"}
+        ],
+        "cards": {
+            "player": ["A♦", "J♥"],
+            "flop": ["Q♠", "7♦", "3♣"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 13,
+        "question": "You have T♣ 9♣ in BTN, flop is J♥ 8♣ 4♠—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["T♣", "9♣"],
+            "flop": ["J♥", "8♣", "4♠"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 14,
+        "question": "You have 3♠ 3♥ in BB, flop is 9♦ 6♠ 2♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Check",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["3♠", "3♥"],
+            "flop": ["9♦", "6♠", "2♣"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 15,
+        "question": "You have A♠ T♠ in HJ, flop is A♣ 5♥ 8♦, turn is 7♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["A♠", "T♠"],
+            "flop": ["A♣", "5♥", "8♦"],
+            "turn": "7♣",
+            "river": null
+        }
+    },
+    {
+        "id": 16,
+        "question": "You have K♥ K♦ in UTG, flop is 4♠ 9♣ 2♦—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["K♥", "K♦"],
+            "flop": ["4♠", "9♣", "2♦"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 17,
+        "question": "You have Q♠ J♣ in BTN, flop is K♦ T♠ 6♥, turn is 2♠, river is 8♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Check",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["Q♠", "J♣"],
+            "flop": ["K♦", "T♠", "6♥"],
+            "turn": "2♠",
+            "river": "8♣"
+        }
+    },
+    {
+        "id": 18,
+        "question": "You have 5♣ 4♣ in CO, flop is 6♦ 7♣ 3♠—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"},
+            {"position": "UTG", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["5♣", "4♣"],
+            "flop": ["6♦", "7♣", "3♠"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 19,
+        "question": "You have A♥ Q♦ in HJ, flop is A♦ 8♠ 2♣, turn is 6♥—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["A♥", "Q♦"],
+            "flop": ["A♦", "8♠", "2♣"],
+            "turn": "6♥",
+            "river": null
+        }
+    },
+    {
+        "id": 20,
+        "question": "You have J♥ J♦ in UTG—best move?",
+        "options": ["Raise", "Call", "Fold", "Check"],
+        "answer": "Raise",
+        "opponent_actions": [
+            {"position": "SB", "action": "folds"},
+            {"position": "BB", "action": "calls $2"}
+        ],
+        "cards": {
+            "player": ["J♥", "J♦"],
+            "flop": [],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 21,
+        "question": "You have 9♦ 9♣ in HJ, flop is 9♥ 3♠ 6♦—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["9♦", "9♣"],
+            "flop": ["9♥", "3♠", "6♦"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 22,
+        "question": "You have A♠ J♣ in CO, flop is Q♥ 7♠ 4♦—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Check",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "bets $10"},
+            {"position": "UTG", "action": "folds"}
+        ],
+        "cards": {
+            "player": ["A♠", "J♣"],
+            "flop": ["Q♥", "7♠", "4♦"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 23,
+        "question": "You have 8♣ 7♣ in BTN, flop is T♠ 9♣ 2♥—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["8♣", "7♣"],
+            "flop": ["T♠", "9♣", "2♥"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 24,
+        "question": "You have 2♦ 2♠ in BB, flop is 8♥ 5♣ 3♦—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Check",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["2♦", "2♠"],
+            "flop": ["8♥", "5♣", "3♦"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 25,
+        "question": "You have A♣ T♥ in HJ, flop is A♦ 6♠ 9♣, turn is 4♥—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["A♣", "T♥"],
+            "flop": ["A♦", "6♠", "9♣"],
+            "turn": "4♥",
+            "river": null
+        }
+    },
+    {
+        "id": 26,
+        "question": "You have Q♥ Q♠ in UTG, flop is 5♦ 8♣ 2♥—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["Q♥", "Q♠"],
+            "flop": ["5♦", "8♣", "2♥"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 27,
+        "question": "You have K♠ J♦ in BTN, flop is K♣ 7♥ 3♠, turn is 9♦, river is 2♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["K♠", "J♦"],
+            "flop": ["K♣", "7♥", "3♠"],
+            "turn": "9♦",
+            "river": "2♣"
+        }
+    },
+    {
+        "id": 28,
+        "question": "You have 7♠ 6♠ in CO, flop is 8♦ 9♠ 4♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"},
+            {"position": "UTG", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["7♠", "6♠"],
+            "flop": ["8♦", "9♠", "4♣"],
+            "turn": null,
+            "river": null
+        }
+    },
+    {
+        "id": 29,
+        "question": "You have A♦ K♣ in HJ, flop is A♥ 8♦ 3♠, turn is 5♣—best move?",
+        "options": ["Bet", "Check", "Fold", "Raise"],
+        "answer": "Bet",
+        "opponent_actions": [
+            {"position": "SB", "action": "checks"},
+            {"position": "BB", "action": "checks"}
+        ],
+        "cards": {
+            "player": ["A♦", "K♣"],
+            "flop": ["A♥", "8♦", "3♠"],
+            "turn": "5♣",
+            "river": null
+        }
+    }
 ]

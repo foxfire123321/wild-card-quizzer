@@ -4,11 +4,25 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 
+interface OpponentAction {
+  position: string;
+  action: string;
+}
+
+interface Cards {
+  player: string[];
+  flop: string[];
+  turn: string | null;
+  river: string | null;
+}
+
 interface Question {
   id: number;
-  text: string;
+  question: string;
   options: string[];
-  correctAnswer: string;
+  answer: string;
+  opponent_actions?: OpponentAction[];
+  cards?: Cards;
 }
 
 const Quiz = () => {
@@ -71,7 +85,31 @@ const Quiz = () => {
             <h2 className="text-xl font-medium mb-4">All Questions:</h2>
             {questions.map((question) => (
               <Card key={question.id} className="p-4 shadow-md hover:shadow-lg transition-shadow">
-                <p className="text-lg font-medium">{question.id}. {question.text}</p>
+                <p className="text-lg font-medium mb-2">{question.id}. {question.question}</p>
+                
+                {question.cards && (
+                  <div className="mb-3 text-sm">
+                    <p className="font-medium">Your cards: {question.cards.player.join(', ')}</p>
+                    {question.cards.flop.length > 0 && (
+                      <p>Flop: {question.cards.flop.join(', ')}</p>
+                    )}
+                    {question.cards.turn && <p>Turn: {question.cards.turn}</p>}
+                    {question.cards.river && <p>River: {question.cards.river}</p>}
+                  </div>
+                )}
+                
+                {question.opponent_actions && question.opponent_actions.length > 0 && (
+                  <div className="mb-3 text-sm">
+                    <p className="font-medium">Opponents:</p>
+                    <ul className="list-disc list-inside pl-2">
+                      {question.opponent_actions.map((action, index) => (
+                        <li key={index}>
+                          {action.position}: {action.action}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </Card>
             ))}
           </div>
