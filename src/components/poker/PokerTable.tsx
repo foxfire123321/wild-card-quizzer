@@ -28,9 +28,9 @@ const tablePositions = [
   { x: 50, y: 85 },  // Bottom (user)
   { x: 90, y: 75 },  // Bottom right - moved 10% right
   { x: 90, y: 15 },  // Top right
-  { x: 50, y: 15 },  // Top
-  { x: -90, y: 15 },  // Top left - moved 10% left
-  { x: -90, y: 75 }   // Bottom left - moved 10% left
+  { x: 50, y: 5 },  // Top
+  { x: 10, y: 15 },  // Top left - moved 10% left
+  { x: 10, y: 75 }   // Bottom left - moved 10% left
 ];
 
 // Map positions to indices on the table (clockwise, starting from bottom)
