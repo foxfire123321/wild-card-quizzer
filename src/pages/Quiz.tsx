@@ -5,10 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import PokerTable from "@/components/poker/PokerTable";
 import AnswerOptions from "@/components/poker/AnswerOptions";
-import { useQuizData, extractUserPosition, Question } from "@/utils/quizUtils";
+import { useQuizData, extractUserPosition, Question, shuffleArray } from "@/utils/quizUtils";
 
 const Quiz = () => {
-  const { questions, loading, error } = useQuizData();
+  const { questions: originalQuestions, loading, error } = useQuizData();
+  const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -17,19 +18,26 @@ const Quiz = () => {
   const [visibleOpponents, setVisibleOpponents] = useState<number[]>([]);
   const navigate = useNavigate();
 
+  // Shuffle questions when they load
+  useEffect(() => {
+    if (originalQuestions.length > 0) {
+      setShuffledQuestions(shuffleArray([...originalQuestions]));
+    }
+  }, [originalQuestions]);
+
   // When questions load or current question changes, update the user position
   useEffect(() => {
-    if (questions.length > 0 && currentQuestionIndex < questions.length) {
-      const position = extractUserPosition(questions[currentQuestionIndex].question);
+    if (shuffledQuestions.length > 0 && currentQuestionIndex < shuffledQuestions.length) {
+      const position = extractUserPosition(shuffledQuestions[currentQuestionIndex].question);
       setUserPosition(position);
       setVisibleOpponents([]); // Reset visible opponents for the new question
     }
-  }, [currentQuestionIndex, questions]);
+  }, [currentQuestionIndex, shuffledQuestions]);
 
   // Animate opponent actions appearance
   useEffect(() => {
-    if (questions.length > 0 && currentQuestionIndex < questions.length) {
-      const currentQuestion = questions[currentQuestionIndex];
+    if (shuffledQuestions.length > 0 && currentQuestionIndex < shuffledQuestions.length) {
+      const currentQuestion = shuffledQuestions[currentQuestionIndex];
       if (!currentQuestion.opponent_actions) return;
 
       // Clear any existing timeouts
@@ -48,10 +56,10 @@ const Quiz = () => {
         timeoutIds.forEach(id => window.clearTimeout(id));
       };
     }
-  }, [currentQuestionIndex, questions]);
+  }, [currentQuestionIndex, shuffledQuestions]);
 
   const handleAnswerSelect = (answer: string) => {
-    const currentQuestion = questions[currentQuestionIndex];
+    const currentQuestion = shuffledQuestions[currentQuestionIndex];
     
     setSelectedAnswer(answer);
     const correct = answer === currentQuestion.answer;
@@ -63,7 +71,7 @@ const Quiz = () => {
     
     // Move to next question after delay
     setTimeout(() => {
-      if (currentQuestionIndex < questions.length - 1) {
+      if (currentQuestionIndex < shuffledQuestions.length - 1) {
         setCurrentQuestionIndex(prevIndex => prevIndex + 1);
         setSelectedAnswer(null);
         setIsCorrect(null);
@@ -77,11 +85,11 @@ const Quiz = () => {
 
   // Render the current question
   const renderCurrentQuestion = () => {
-    if (loading || questions.length === 0 || currentQuestionIndex >= questions.length) {
+    if (loading || shuffledQuestions.length === 0 || currentQuestionIndex >= shuffledQuestions.length) {
       return null;
     }
 
-    const currentQuestion = questions[currentQuestionIndex];
+    const currentQuestion = shuffledQuestions[currentQuestionIndex];
 
     return (
       <div className="w-full h-full flex flex-col items-center">
@@ -103,6 +111,7 @@ const Quiz = () => {
           
           <AnswerOptions 
             options={currentQuestion.options}
+            correctAnswer={currentQuestion.answer}
             selectedAnswer={selectedAnswer}
             isCorrect={isCorrect}
             onAnswerSelect={handleAnswerSelect}
