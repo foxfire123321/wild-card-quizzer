@@ -9,6 +9,7 @@ interface AnswerOptionsProps {
   selectedAnswer: string | null;
   isCorrect: boolean | null;
   onAnswerSelect: (answer: string) => void;
+  shuffleOptions?: boolean; // New prop to control shuffling
 }
 
 const AnswerOptions: React.FC<AnswerOptionsProps> = ({ 
@@ -16,15 +17,20 @@ const AnswerOptions: React.FC<AnswerOptionsProps> = ({
   correctAnswer,
   selectedAnswer, 
   isCorrect, 
-  onAnswerSelect 
+  onAnswerSelect,
+  shuffleOptions = true // Default to shuffling
 }) => {
-  // State to store shuffled options
-  const [shuffledOptions, setShuffledOptions] = useState<string[]>([]);
+  // State to store options that may be shuffled
+  const [displayOptions, setDisplayOptions] = useState<string[]>([]);
   
-  // Shuffle options when they change
+  // Set options, shuffling if needed
   useEffect(() => {
-    setShuffledOptions(shuffleArray([...options]));
-  }, [options]);
+    if (shuffleOptions) {
+      setDisplayOptions(shuffleArray([...options]));
+    } else {
+      setDisplayOptions([...options]);
+    }
+  }, [options, shuffleOptions]);
   
   // Function to determine button styling based on selection state
   const getButtonClass = (option: string) => {
@@ -41,7 +47,7 @@ const AnswerOptions: React.FC<AnswerOptionsProps> = ({
   
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-      {shuffledOptions.map((option, index) => (
+      {displayOptions.map((option, index) => (
         <Button
           key={`option-${index}`}
           className={getButtonClass(option)}

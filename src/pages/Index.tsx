@@ -1,12 +1,26 @@
 
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const handleStartQuiz = () => {
     navigate("/quiz");
+  };
+
+  const handleStartQuizTwo = () => {
+    navigate("/quiz-two");
+  };
+
+  const handleAuthAction = () => {
+    if (user) {
+      signOut();
+    } else {
+      navigate("/auth");
+    }
   };
 
   return (
@@ -24,12 +38,29 @@ const Index = () => {
         <div className="text-poker-gold text-5xl font-bold italic">Logo</div>
       </div>
       
-      <Button 
-        onClick={handleStartQuiz}
-        className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
-      >
-        Poker Quiz One
-      </Button>
+      <div className="flex flex-col gap-4 items-center">
+        <Button 
+          onClick={handleStartQuiz}
+          className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
+        >
+          Poker Quiz One
+        </Button>
+        
+        <Button 
+          onClick={handleStartQuizTwo}
+          className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
+        >
+          Poker Quiz Two
+        </Button>
+        
+        <Button 
+          onClick={handleAuthAction}
+          variant="outline" 
+          className="mt-4 border-poker-gold text-poker-gold hover:bg-amber-100"
+        >
+          {user ? 'Sign Out' : 'Sign In'}
+        </Button>
+      </div>
     </div>
   );
 };
