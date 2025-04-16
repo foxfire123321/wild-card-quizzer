@@ -10,21 +10,29 @@ interface OpponentActionProps {
 
 const OpponentAction: React.FC<OpponentActionProps> = ({ action, position, isVisible }) => {
   const [isFolded, setIsFolded] = useState(false);
+  const [showAction, setShowAction] = useState(true);
   
   useEffect(() => {
     // If the action includes "fold", trigger fold animation
     if (isVisible && action.toLowerCase().includes("fold")) {
       // Add a delay before folding to make sure the action is visible first
-      const timeout = setTimeout(() => {
+      const foldTimeout = setTimeout(() => {
         setIsFolded(true);
+        // Hide the action label along with the cards
+        const actionHideTimeout = setTimeout(() => {
+          setShowAction(false);
+        }, 500); // Matches the fold animation duration
+        
+        return () => clearTimeout(actionHideTimeout);
       }, 1000); // 1 second after the action appears
       
-      return () => clearTimeout(timeout);
+      return () => clearTimeout(foldTimeout);
     }
     
     // Reset fold state when changing to a new question
     if (!isVisible) {
       setIsFolded(false);
+      setShowAction(true);
     }
   }, [isVisible, action]);
 
@@ -37,7 +45,7 @@ const OpponentAction: React.FC<OpponentActionProps> = ({ action, position, isVis
         transform: 'translate(-50%, -50%)' 
       }}
     >
-      {isVisible && (
+      {isVisible && showAction && (
         <div className="bg-amber-400 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md text-xs mb-1 min-w-14 sm:min-w-18 text-center text-black animate-fade-in">
           {action}
         </div>
