@@ -1,0 +1,21 @@
+
+[
+  {
+    "id": 1,
+    "text": "What is the highest hand in poker?",
+    "options": ["Full House", "Straight", "Royal Flush", "Four of a Kind"],
+    "correctAnswer": "Royal Flush"
+  },
+  {
+    "id": 2,
+    "text": "How many cards are in a standard deck?",
+    "options": ["48", "52", "54", "50"],
+    "correctAnswer": "52"
+  },
+  {
+    "id": 3,
+    "text": "Which of these is NOT a poker variant?",
+    "options": ["Texas Hold'em", "Omaha", "Blackjack", "Seven-Card Stud"],
+    "correctAnswer": "Blackjack"
+  }
+]
