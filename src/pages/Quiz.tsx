@@ -1,14 +1,14 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import PokerTable from "@/components/poker/PokerTable";
 import AnswerOptions from "@/components/poker/AnswerOptions";
-import { useQuizData, extractUserPosition, Question } from "@/utils/quizUtils";
+import { useQuizData, extractUserPosition, Question, shouldPromptLogin, recordGameplayLoop } from "@/utils/quizUtils";
 import { shuffleArray } from "@/utils/arrayUtils";
 import { LivesDisplay } from "@/components/poker/LivesDisplay";
 import { useAuth } from "@/context/AuthContext";
-import { shouldPromptLogin, recordGameplayLoop } from "@/utils/quizUtils";
 import LoginPrompt from "@/components/LoginPrompt";
 import { toast } from "sonner";
 
