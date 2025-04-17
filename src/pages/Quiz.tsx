@@ -1,10 +1,10 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Heart, Clock } from "lucide-react";
+import { Heart, HeartCrack, Clock } from "lucide-react";
 import PokerTable from "@/components/poker/PokerTable";
 import AnswerOptions from "@/components/poker/AnswerOptions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -23,9 +23,17 @@ const Quiz = () => {
   
   // Competitive mode states
   const [timeRemaining, setTimeRemaining] = useState(20);
+  const [timerPercent, setTimerPercent] = useState(100);
   const [lives, setLives] = useState(3);
   const [isGameOver, setIsGameOver] = useState(false);
   const [showGameOverDialog, setShowGameOverDialog] = useState(false);
+  
+  // Animation states
+  const [showDamageFlash, setShowDamageFlash] = useState(false);
+  const [lostLifeIndex, setLostLifeIndex] = useState<number | null>(null);
+  const timerRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const lastUpdateTimeRef = useRef<number | null>(null);
 
   // Shuffle questions when they load
   useEffect(() => {
@@ -40,34 +48,94 @@ const Quiz = () => {
       const position = extractUserPosition(shuffledQuestions[currentQuestionIndex].question);
       setUserPosition(position);
       setVisibleOpponents([]); // Reset visible opponents for the new question
-      setTimeRemaining(20); // Reset timer for new question
+      resetTimer(); // Reset timer for new question
     }
   }, [currentQuestionIndex, shuffledQuestions]);
 
-  // Timer countdown effect
+  // Smooth timer animation using requestAnimationFrame
+  const resetTimer = () => {
+    if (timerRef.current) {
+      cancelAnimationFrame(timerRef.current);
+    }
+    setTimeRemaining(20);
+    setTimerPercent(100);
+    startTimeRef.current = Date.now();
+    lastUpdateTimeRef.current = null;
+    
+    // Start the timer animation
+    if (!isGameOver && !selectedAnswer) {
+      animateTimer();
+    }
+  };
+
+  const animateTimer = () => {
+    if (!startTimeRef.current) {
+      startTimeRef.current = Date.now();
+    }
+    
+    const now = Date.now();
+    const elapsed = now - startTimeRef.current;
+    const totalDuration = 20000; // 20 seconds in milliseconds
+    
+    // Calculate new percentage and time remaining
+    const newPercent = Math.max(0, 100 - (elapsed / totalDuration) * 100);
+    const newTimeRemaining = Math.max(0, Math.ceil((totalDuration - elapsed) / 1000));
+    
+    setTimerPercent(newPercent);
+    
+    // Only update the displayed time when it changes (once per second)
+    if (newTimeRemaining !== timeRemaining) {
+      setTimeRemaining(newTimeRemaining);
+    }
+    
+    // Check if timer has reached zero
+    if (newPercent <= 0) {
+      handleTimeUp();
+      return;
+    }
+    
+    // Continue animation
+    if (!isGameOver && !selectedAnswer) {
+      timerRef.current = requestAnimationFrame(animateTimer);
+    }
+  };
+
+  // Clean up timer animation on component unmount
   useEffect(() => {
-    if (loading || isGameOver || selectedAnswer) return;
-    
-    const timer = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleTimeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
-    return () => clearInterval(timer);
+    return () => {
+      if (timerRef.current) {
+        cancelAnimationFrame(timerRef.current);
+      }
+    };
+  }, []);
+
+  // Start or stop timer based on game state
+  useEffect(() => {
+    if (loading || isGameOver || selectedAnswer) {
+      // Stop the timer
+      if (timerRef.current) {
+        cancelAnimationFrame(timerRef.current);
+        timerRef.current = null;
+      }
+    } else if (!timerRef.current && !isGameOver && !selectedAnswer) {
+      // Start the timer
+      resetTimer();
+    }
   }, [currentQuestionIndex, loading, isGameOver, selectedAnswer]);
 
   // Handle time running out
   const handleTimeUp = () => {
+    if (timerRef.current) {
+      cancelAnimationFrame(timerRef.current);
+      timerRef.current = null;
+    }
+    
     const currentQuestion = shuffledQuestions[currentQuestionIndex];
     setSelectedAnswer(currentQuestion.answer); // Show correct answer
     setIsCorrect(false);
-    setLives(prev => prev - 1);
+    
+    // Trigger life loss animation
+    triggerLifeLossAnimation();
     
     setTimeout(() => {
       if (lives <= 1) {
@@ -78,7 +146,7 @@ const Quiz = () => {
       }
     }, 1500);
   };
-
+  
   // Animate opponent actions appearance
   useEffect(() => {
     if (shuffledQuestions.length > 0 && currentQuestionIndex < shuffledQuestions.length) {
@@ -103,6 +171,19 @@ const Quiz = () => {
     }
   }, [currentQuestionIndex, shuffledQuestions]);
 
+  // Trigger life loss animation
+  const triggerLifeLossAnimation = () => {
+    setLostLifeIndex(lives - 1); // Index of the heart being lost
+    setShowDamageFlash(true);
+    setLives(prev => prev - 1);
+    
+    // Reset damage flash after animation completes
+    setTimeout(() => {
+      setShowDamageFlash(false);
+      setLostLifeIndex(null);
+    }, 500);
+  };
+
   const handleAnswerSelect = (answer: string) => {
     if (isGameOver) return;
     
@@ -112,10 +193,17 @@ const Quiz = () => {
     const correct = answer === currentQuestion.answer;
     setIsCorrect(correct);
     
+    // Stop the timer
+    if (timerRef.current) {
+      cancelAnimationFrame(timerRef.current);
+      timerRef.current = null;
+    }
+    
     if (correct) {
       setScore(prevScore => prevScore + 1);
     } else {
-      setLives(prev => prev - 1);
+      // Trigger life loss animation for wrong answer
+      triggerLifeLossAnimation();
     }
     
     // Move to next question after delay
@@ -138,7 +226,7 @@ const Quiz = () => {
     setSelectedAnswer(null);
     setIsCorrect(null);
     setVisibleOpponents([]); 
-    setTimeRemaining(20); // Reset timer
+    resetTimer(); // Reset timer for next question
   };
   
   const restartQuiz = () => {
@@ -151,7 +239,8 @@ const Quiz = () => {
     setScore(0);
     setLives(3);
     setVisibleOpponents([]);
-    setTimeRemaining(20);
+    setShowDamageFlash(false);
+    setLostLifeIndex(null);
     setIsGameOver(false);
     setShowGameOverDialog(false);
   };
@@ -171,22 +260,61 @@ const Quiz = () => {
         {/* Competitive mode UI - timer and lives */}
         <div className="w-full max-w-lg mb-4 flex justify-between items-center">
           <div className="flex items-center gap-1">
-            {[...Array(3)].map((_, i) => (
-              <Heart 
-                key={i} 
-                className={`h-6 w-6 ${i < lives ? 'text-red-500 fill-red-500' : 'text-gray-400'}`}
-              />
-            ))}
+            {[...Array(3)].map((_, i) => {
+              // Determine if this heart is the one being lost
+              const isCurrentlyLost = lostLifeIndex === i;
+              // Determine if this heart should be displayed (still has lives)
+              const isActive = i < lives || isCurrentlyLost;
+              
+              return (
+                <div 
+                  key={i} 
+                  className={`relative ${isCurrentlyLost ? 'animate-none' : ''}`}
+                >
+                  {isCurrentlyLost ? (
+                    // Animated broken heart that falls and fades
+                    <>
+                      <div className="absolute">
+                        <HeartCrack 
+                          className="h-6 w-6 text-red-500 transform -rotate-15 animate-[fold-cards_0.5s_ease-in-out_forwards] opacity-0"
+                          style={{
+                            transformOrigin: 'center'
+                          }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    // Regular heart
+                    <Heart 
+                      className={`h-6 w-6 ${isActive ? 'text-red-500 fill-red-500' : 'text-gray-400'}`}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-amber-400" />
             <div className="w-32">
-              <Progress value={(timeRemaining / 20) * 100} className="h-2">
+              <Progress 
+                value={timerPercent} 
+                className="h-2"
+              >
                 <span className="absolute text-xs text-white right-1">{timeRemaining}s</span>
               </Progress>
             </div>
           </div>
         </div>
+        
+        {/* Damage flash overlay */}
+        {showDamageFlash && (
+          <div 
+            className="fixed inset-0 bg-red-500 bg-opacity-30 pointer-events-none z-50 animate-fade-in"
+            style={{
+              animation: 'fade-in 0.1s ease-in, fade-out 0.4s ease-out 0.1s forwards'
+            }}
+          ></div>
+        )}
         
         {/* Poker table with cards and actions */}
         <PokerTable 

@@ -126,3 +126,44 @@
   margin: 0;
   text-align: inherit;
 }
+
+/* Animation keyframes for damage flash and heart animations */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes heart-fall-left {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-20px, 50px) rotate(-30deg);
+    opacity: 0;
+  }
+}
+
+@keyframes heart-fall-right {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(20px, 50px) rotate(30deg);
+    opacity: 0;
+  }
+}
