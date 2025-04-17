@@ -11,11 +11,43 @@ import Quiz from "./pages/Quiz";
 import QuizTwo from "./pages/QuizTwo";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Protected route wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading } = useAuth();
+  
+  console.log("Protected route: User:", user?.email, "Loading:", isLoading);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
+        <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full"></div>
+        <p className="mt-4 text-gray-600">Checking authentication...</p>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    console.log("User not authenticated, redirecting to auth");
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 const App = () => {
+  console.log("App rendering");
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -25,8 +57,16 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/quiz" element={<Quiz />} />
-              <Route path="/quiz-two" element={<QuizTwo />} />
+              <Route path="/quiz" element={
+                <ProtectedRoute>
+                  <Quiz />
+                </ProtectedRoute>
+              } />
+              <Route path="/quiz-two" element={
+                <ProtectedRoute>
+                  <QuizTwo />
+                </ProtectedRoute>
+              } />
               <Route path="/auth" element={<Auth />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

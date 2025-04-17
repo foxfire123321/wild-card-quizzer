@@ -1,24 +1,44 @@
-
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const Auth = () => {
   const { user, isLoading, signInWithGoogle, signInWithApple } = useAuth();
   const navigate = useNavigate();
+  const [authInProgress, setAuthInProgress] = useState(false);
 
   useEffect(() => {
+    console.log("Auth page mounted. User:", user?.email, "Loading:", isLoading);
+    
     if (user && !isLoading) {
+      console.log("User authenticated, navigating to home");
       navigate('/');
     }
   }, [user, isLoading, navigate]);
 
-  if (isLoading) {
+  const handleGoogleSignIn = async () => {
+    console.log("Google sign in button clicked");
+    setAuthInProgress(true);
+    await signInWithGoogle();
+    // Don't reset authInProgress since we want to keep showing loading state
+    // until we get redirected
+  };
+
+  const handleAppleSignIn = async () => {
+    console.log("Apple sign in button clicked");
+    setAuthInProgress(true);
+    await signInWithApple();
+    // Don't reset authInProgress for the same reason
+  };
+
+  if (isLoading || authInProgress) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
         <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full"></div>
-        <p className="mt-4 text-gray-600">Loading...</p>
+        <p className="mt-4 text-gray-600">
+          {authInProgress ? "Redirecting to authentication provider..." : "Loading..."}
+        </p>
       </div>
     );
   }
@@ -36,7 +56,7 @@ const Auth = () => {
       
       <div className="w-full max-w-md space-y-4">
         <Button 
-          onClick={signInWithGoogle}
+          onClick={handleGoogleSignIn}
           className="w-full bg-white text-gray-800 hover:bg-gray-100 border border-gray-300"
         >
           <svg className="mr-2 h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
@@ -46,7 +66,7 @@ const Auth = () => {
         </Button>
         
         <Button 
-          onClick={signInWithApple}
+          onClick={handleAppleSignIn}
           className="w-full bg-black text-white hover:bg-gray-800"
         >
           <svg className="mr-2 h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
@@ -62,6 +82,14 @@ const Auth = () => {
         >
           Back to Home
         </Button>
+      </div>
+      
+      <div className="mt-8 text-sm text-gray-600">
+        <p>If you're experiencing login issues, please check:</p>
+        <ul className="list-disc pl-5 mt-2">
+          <li>Your browser isn't blocking third-party cookies</li>
+          <li>The authentication provider is properly configured</li>
+        </ul>
       </div>
     </div>
   );
