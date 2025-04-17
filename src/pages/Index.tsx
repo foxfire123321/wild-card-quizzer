@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -23,6 +24,10 @@ const Index = () => {
 
   const handlePokerCompanion = () => {
     navigate("/poker-companion");
+  };
+  
+  const handlePokerPersonalityQuiz = () => {
+    navigate("/poker-personality-quiz");
   };
 
   const handleAuthAction = () => {
@@ -77,6 +82,13 @@ const Index = () => {
           className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
         >
           Poker Companion
+        </Button>
+        
+        <Button 
+          onClick={handlePokerPersonalityQuiz}
+          className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
+        >
+          Poker Personality Quiz
         </Button>
         
         <Button 

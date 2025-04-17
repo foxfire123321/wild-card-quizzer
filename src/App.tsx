@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +13,8 @@ import Auth from "./pages/Auth";
 import PokerCompanion from "./pages/PokerCompanion";
 import CreatePokerLog from "./pages/CreatePokerLog";
 import PokerLogDetails from "./pages/PokerLogDetails";
+import PokerPersonalityQuiz from "./pages/PokerPersonalityQuiz";
+import PokerPersonalityResult from "./pages/PokerPersonalityResult";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +80,16 @@ const App = () => {
               <Route path="/poker-companion/log/:logId" element={
                 <ProtectedRoute>
                   <PokerLogDetails />
+                </ProtectedRoute>
+              } />
+              <Route path="/poker-personality-quiz" element={
+                <ProtectedRoute>
+                  <PokerPersonalityQuiz />
+                </ProtectedRoute>
+              } />
+              <Route path="/poker-personality-result" element={
+                <ProtectedRoute>
+                  <PokerPersonalityResult />
                 </ProtectedRoute>
               } />
               <Route path="/auth" element={<Auth />} />
