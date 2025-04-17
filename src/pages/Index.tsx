@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -8,7 +7,6 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading } = useAuth();
   
-  // Redirect unauthenticated users to auth page
   useEffect(() => {
     if (!isLoading && !user) {
       navigate("/auth");
@@ -23,6 +21,10 @@ const Index = () => {
     navigate("/quiz-two");
   };
 
+  const handlePokerCompanion = () => {
+    navigate("/poker-companion");
+  };
+
   const handleAuthAction = () => {
     if (user) {
       signOut();
@@ -31,7 +33,6 @@ const Index = () => {
     }
   };
   
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
@@ -69,6 +70,13 @@ const Index = () => {
           className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
         >
           Poker Quiz Two
+        </Button>
+        
+        <Button 
+          onClick={handlePokerCompanion}
+          className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
+        >
+          Poker Companion
         </Button>
         
         <Button 

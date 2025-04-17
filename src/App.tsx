@@ -1,17 +1,17 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import Index from "./pages/Index";
 import Quiz from "./pages/Quiz";
 import QuizTwo from "./pages/QuizTwo";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import PokerCompanion from "./pages/PokerCompanion";
+import CreatePokerLog from "./pages/CreatePokerLog";
+import PokerLogDetails from "./pages/PokerLogDetails";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,7 +22,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
@@ -46,8 +45,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  console.log("App rendering");
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -65,6 +62,21 @@ const App = () => {
               <Route path="/quiz-two" element={
                 <ProtectedRoute>
                   <QuizTwo />
+                </ProtectedRoute>
+              } />
+              <Route path="/poker-companion" element={
+                <ProtectedRoute>
+                  <PokerCompanion />
+                </ProtectedRoute>
+              } />
+              <Route path="/poker-companion/create" element={
+                <ProtectedRoute>
+                  <CreatePokerLog />
+                </ProtectedRoute>
+              } />
+              <Route path="/poker-companion/log/:logId" element={
+                <ProtectedRoute>
+                  <PokerLogDetails />
                 </ProtectedRoute>
               } />
               <Route path="/auth" element={<Auth />} />

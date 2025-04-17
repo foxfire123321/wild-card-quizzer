@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      poker_logs: {
+        Row: {
+          big_blind: number
+          buy_in: number
+          cash_out: number
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          small_blind: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          big_blind: number
+          buy_in: number
+          cash_out: number
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          small_blind: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          big_blind?: number
+          buy_in?: number
+          cash_out?: number
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          small_blind?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       quiz_progress: {
         Row: {
           created_at: string | null
