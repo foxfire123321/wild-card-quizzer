@@ -16,7 +16,7 @@ export async function saveQuizProgress(quizId: string, questionIndex: number) {
         user_id: user.user.id,
         quiz_id: quizId,
         last_question_index: questionIndex,
-        updated_at: new Date()
+        updated_at: new Date().toISOString() // Convert Date to ISO string
       },
       { onConflict: "user_id,quiz_id" }
     );
