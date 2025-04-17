@@ -63,24 +63,24 @@ const Index = () => {
         <Button
           onClick={handleLeaderboard}
           variant="outline"
-          className="rounded-full p-2 h-10 w-10 border-poker-gold text-poker-gold hover:bg-amber-100"
+          className="rounded-full p-2 h-10 w-10 border-amber-400 text-amber-400 hover:bg-amber-100"
         >
           <Award className="h-5 w-5" />
         </Button>
       </div>
       
       <div className="text-center mb-8">
-        <h1 className="text-poker-gold text-4xl md:text-5xl font-bold mb-2">
+        <h1 className="text-amber-500 text-4xl md:text-5xl font-bold mb-2">
           poker gone wild
         </h1>
-        <h2 className="text-poker-gold text-6xl md:text-7xl font-bold">
+        <h2 className="text-amber-500 text-6xl md:text-7xl font-bold">
           quiz
         </h2>
       </div>
       
-      <div className="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-poker-gold flex items-center justify-center mb-12 overflow-hidden">
+      <div className="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-amber-500 flex items-center justify-center mb-12 overflow-hidden">
         <img 
-          src="/lovable-uploads/95a79a2d-e88f-49d3-a2f6-2d7bfcb138c5.png" 
+          src="/lovable-uploads/e8021b21-2114-4ae3-b56a-79511e5a38bf.png" 
           alt="Poker Gone Wild Logo" 
           className="w-full h-full object-cover" 
         />
@@ -89,52 +89,28 @@ const Index = () => {
       <div className="flex flex-col gap-4 items-center">
         <Button 
           onClick={handleStartQuiz}
-          className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
-          style={{
-            backgroundImage: "url('/lovable-uploads/df7d54ef-8b1b-4430-9eda-5119cbc46e14.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundBlendMode: "overlay"
-          }}
+          className="bg-amber-400 hover:bg-amber-500 text-black font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
         >
           Poker Quiz One
         </Button>
         
         <Button 
           onClick={handleStartQuizTwo}
-          className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
-          style={{
-            backgroundImage: "url('/lovable-uploads/df7d54ef-8b1b-4430-9eda-5119cbc46e14.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundBlendMode: "overlay"
-          }}
+          className="bg-amber-400 hover:bg-amber-500 text-black font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
         >
           Poker Quiz Two
         </Button>
         
         <Button 
           onClick={handlePokerCompanion}
-          className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
-          style={{
-            backgroundImage: "url('/lovable-uploads/df7d54ef-8b1b-4430-9eda-5119cbc46e14.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundBlendMode: "overlay"
-          }}
+          className="bg-amber-400 hover:bg-amber-500 text-black font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
         >
           Poker Companion
         </Button>
         
         <Button 
           onClick={handlePokerPersonalityQuiz}
-          className="bg-poker-gold hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
-          style={{
-            backgroundImage: "url('/lovable-uploads/df7d54ef-8b1b-4430-9eda-5119cbc46e14.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundBlendMode: "overlay"
-          }}
+          className="bg-amber-400 hover:bg-amber-500 text-black font-bold py-4 px-8 rounded-lg text-xl w-64 transform transition-transform duration-200 hover:scale-105"
         >
           Poker Personality Quiz
         </Button>
@@ -142,7 +118,7 @@ const Index = () => {
         <Button 
           onClick={handleAuthAction}
           variant="outline" 
-          className="mt-4 border-poker-gold text-poker-gold hover:bg-amber-100"
+          className="mt-4 border-amber-400 text-amber-400 hover:bg-amber-100"
         >
           {user ? 'Sign Out' : 'Sign In'}
         </Button>
