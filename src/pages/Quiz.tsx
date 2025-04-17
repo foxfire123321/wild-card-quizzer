@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -62,14 +63,14 @@ const Quiz = () => {
       title: "Timer Bar",
       content: "You've got 20 seconds. Don't stall.",
       position: { top: "15%", right: "20%", transform: "translate(0, 0)" },
-      arrowPosition: { bottom: "-30px", left: "20px", transform: "rotate(90deg)" }
+      arrowPosition: { top: "-30px", left: "20px", transform: "rotate(90deg)" } // Changed from bottom to top
     },
     {
       id: "lives",
       title: "Lives",
       content: "Three lives. Wrong answer or time-out = 1 life gone.",
       position: { top: "15%", left: "20%", transform: "translate(0, 0)" },
-      arrowPosition: { bottom: "-30px", right: "20px", transform: "rotate(90deg)" }
+      arrowPosition: { top: "-30px", right: "20px", transform: "rotate(90deg)" } // Changed from bottom to top
     }
   ];
 

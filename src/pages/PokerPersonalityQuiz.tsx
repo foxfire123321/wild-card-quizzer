@@ -20,7 +20,6 @@ const PokerPersonalityQuiz = () => {
   
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<PersonalityType[]>([]);
-  const [currentAnswer, setCurrentAnswer] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -35,15 +34,9 @@ const PokerPersonalityQuiz = () => {
   }, [user, isLoading]);
   
   const handleAnswerSelect = (answerId: string) => {
-    setCurrentAnswer(answerId);
-  };
-  
-  const handleNextQuestion = () => {
-    if (!currentAnswer) return;
-    
     // Get the personality type associated with the selected answer
     const currentQuestion = quizQuestions[currentQuestionIndex];
-    const selectedAnswerIndex = parseInt(currentAnswer);
+    const selectedAnswerIndex = parseInt(answerId);
     const personalityType = currentQuestion.answers[selectedAnswerIndex].personality;
     
     // If in preview mode and this is the first question, show login prompt
@@ -71,7 +64,6 @@ const PokerPersonalityQuiz = () => {
       if (currentQuestionIndex < quizQuestions.length - 1) {
         // Move to the next question
         setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-        setCurrentAnswer(null);
       } else {
         // Quiz completed, calculate result
         const result = calculatePersonalityResult(newSelectedAnswers);
@@ -140,17 +132,13 @@ const PokerPersonalityQuiz = () => {
                 {currentQuestion.question}
               </h2>
               
-              {/* New button-style answer options */}
+              {/* Button-style answer options that submit immediately on click */}
               <div className="space-y-3">
                 {currentQuestion.answers.map((answer, index) => (
                   <Button
                     key={index}
                     variant="outline"
-                    className={`w-full justify-start text-left py-4 px-4 h-auto whitespace-normal ${
-                      currentAnswer === index.toString() 
-                        ? 'bg-amber-100 border-amber-400 text-amber-800' 
-                        : 'border-gray-200 text-gray-700 hover:bg-amber-50'
-                    }`}
+                    className="w-full justify-start text-left py-4 px-4 h-auto whitespace-normal border-gray-200 text-gray-700 hover:bg-amber-50"
                     onClick={() => handleAnswerSelect(index.toString())}
                   >
                     {answer.text}
@@ -167,14 +155,6 @@ const PokerPersonalityQuiz = () => {
               className="border-amber-400 text-amber-400"
             >
               Back to Menu
-            </Button>
-            
-            <Button 
-              onClick={handleNextQuestion}
-              disabled={currentAnswer === null}
-              className="bg-amber-400 hover:bg-amber-500 text-black"
-            >
-              {currentQuestionIndex < quizQuestions.length - 1 ? 'Next Question' : 'See Results'}
             </Button>
           </div>
         </div>
