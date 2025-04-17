@@ -27,11 +27,7 @@ const Index = () => {
   };
   
   const handlePokerPersonalityQuiz = () => {
-    // If not logged in, show login prompt
-    if (!user) {
-      navigate("/auth", { state: { returnPath: "/poker-personality-quiz" } });
-      return;
-    }
+    // Don't require login upfront, let preview mode handle it
     navigate("/poker-personality-quiz");
   };
 
@@ -80,9 +76,9 @@ const Index = () => {
       
       <div className="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-amber-500 flex items-center justify-center mb-12 overflow-hidden">
         <img 
-          src="/lovable-uploads/e8021b21-2114-4ae3-b56a-79511e5a38bf.png" 
+          src="/lovable-uploads/1fcdc667-e288-446c-8967-7bdc58f5d993.png" 
           alt="Poker Gone Wild Logo" 
-          className="w-full h-full object-contain scale-110" 
+          className="w-full h-full object-cover" 
         />
       </div>
       

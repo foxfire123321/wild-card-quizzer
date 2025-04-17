@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import PokerTable from "@/components/poker/PokerTable";
 import AnswerOptions from "@/components/poker/AnswerOptions";
-import { useQuizData, extractUserPosition, Question } from "@/utils/quizUtils";
+import { useQuizData, extractUserPosition } from "@/utils/quizUtils";
 import { saveQuizProgress, getQuizProgress } from "@/utils/progressUtils";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import LoginPrompt from "@/components/LoginPrompt";
+import OnboardingOverlay, { TooltipInfo } from "@/components/onboarding/OnboardingOverlay";
 
 const QuizTwo = () => {
   const { questions: originalQuestions, loading, error } = useQuizData();
@@ -22,6 +23,31 @@ const QuizTwo = () => {
   const [isProgressLoaded, setIsProgressLoaded] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const navigate = useNavigate();
+
+  // Define onboarding tooltips for Quiz Two
+  const quizTwoTooltips: TooltipInfo[] = [
+    {
+      id: "poker-table-2",
+      title: "Poker Table",
+      content: "Visual breakdown of your current hand and opponents.",
+      position: { top: "30%", left: "50%", transform: "translate(-50%, -50%)" },
+      arrowPosition: { top: "0", left: "-40px", transform: "rotate(-45deg)" }
+    },
+    {
+      id: "question-answers-2",
+      title: "Question & Answers",
+      content: "This is your decision point. Choose wisely — you're building real progress.",
+      position: { top: "65%", left: "50%", transform: "translate(-50%, -50%)" },
+      arrowPosition: { top: "-30px", right: "20px", transform: "rotate(-90deg)" }
+    },
+    {
+      id: "login-reminder",
+      title: "Login Reminder",
+      content: "Want to save your streak? Log in to resume next time.",
+      position: { bottom: "15%", right: "20%", transform: "translate(0, 0)" },
+      arrowPosition: { top: "-30px", left: "20px", transform: "rotate(-90deg)" }
+    }
+  ];
 
   // Load saved progress when component mounts
   useEffect(() => {
@@ -119,6 +145,11 @@ const QuizTwo = () => {
     }, 1500);
   };
 
+  // Handle onboarding completion
+  const handleOnboardingComplete = () => {
+    // Nothing specific needed here for Quiz Two
+  };
+
   // Render the current question
   const renderCurrentQuestion = () => {
     if (loading || originalQuestions.length === 0 || currentQuestionIndex >= originalQuestions.length) {
@@ -130,6 +161,12 @@ const QuizTwo = () => {
     return (
       <div className="w-full h-full flex flex-col items-center">
         <h1 className="text-2xl font-bold text-amber-400 mb-2">Poker Quiz Two</h1>
+        
+        {/* Onboarding overlay */}
+        <OnboardingOverlay 
+          tooltips={quizTwoTooltips}
+          onComplete={handleOnboardingComplete}
+        />
         
         {/* Poker table with cards and actions */}
         <PokerTable 

@@ -14,6 +14,7 @@ import { recordGameplayLoop, shouldPromptLogin } from "@/utils/gameplayUtils";
 import LoginPrompt from "@/components/LoginPrompt";
 import { submitScoreToLeaderboard } from "@/utils/leaderboardUtils";
 import { toast } from "sonner";
+import OnboardingOverlay, { TooltipInfo } from "@/components/onboarding/OnboardingOverlay";
 
 const Quiz = () => {
   const { questions: originalQuestions, loading, error } = useQuizData();
@@ -26,7 +27,6 @@ const Quiz = () => {
   const [visibleOpponents, setVisibleOpponents] = useState<number[]>([]);
   const navigate = useNavigate();
   
-  // Competitive mode states
   const [timeRemaining, setTimeRemaining] = useState(20);
   const [timerPercent, setTimerPercent] = useState(100);
   const [lives, setLives] = useState(3);
@@ -34,7 +34,6 @@ const Quiz = () => {
   const [showGameOverDialog, setShowGameOverDialog] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   
-  // Animation states
   const [showDamageFlash, setShowDamageFlash] = useState(false);
   const [lostLifeIndex, setLostLifeIndex] = useState<number | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -43,24 +42,52 @@ const Quiz = () => {
   
   const { user } = useAuth();
 
-  // Shuffle questions when they load
+  const quizOneTooltips: TooltipInfo[] = [
+    {
+      id: "poker-table",
+      title: "Poker Table",
+      content: "This is where the hand is visualized. Watch how opponents act before you choose.",
+      position: { top: "30%", left: "50%", transform: "translate(-50%, -50%)" },
+      arrowPosition: { top: "0", left: "-40px", transform: "rotate(-45deg)" }
+    },
+    {
+      id: "question-answers",
+      title: "Question & Answer Box",
+      content: "Read the situation carefully, then pick the best response.",
+      position: { top: "65%", left: "50%", transform: "translate(-50%, -50%)" },
+      arrowPosition: { top: "-30px", right: "20px", transform: "rotate(-90deg)" }
+    },
+    {
+      id: "timer",
+      title: "Timer Bar",
+      content: "You've got 20 seconds. Don't stall.",
+      position: { top: "15%", right: "20%", transform: "translate(0, 0)" },
+      arrowPosition: { bottom: "-30px", left: "20px", transform: "rotate(90deg)" }
+    },
+    {
+      id: "lives",
+      title: "Lives",
+      content: "Three lives. Wrong answer or time-out = 1 life gone.",
+      position: { top: "15%", left: "20%", transform: "translate(0, 0)" },
+      arrowPosition: { bottom: "-30px", right: "20px", transform: "rotate(90deg)" }
+    }
+  ];
+
   useEffect(() => {
     if (originalQuestions.length > 0) {
       setShuffledQuestions(shuffleArray([...originalQuestions]));
     }
   }, [originalQuestions]);
 
-  // When questions load or current question changes, update the user position
   useEffect(() => {
     if (shuffledQuestions.length > 0 && currentQuestionIndex < shuffledQuestions.length) {
       const position = extractUserPosition(shuffledQuestions[currentQuestionIndex].question);
       setUserPosition(position);
-      setVisibleOpponents([]); // Reset visible opponents for the new question
-      resetTimer(); // Reset timer for new question
+      setVisibleOpponents([]);
+      resetTimer();
     }
   }, [currentQuestionIndex, shuffledQuestions]);
 
-  // Smooth timer animation using requestAnimationFrame
   const resetTimer = () => {
     if (timerRef.current) {
       cancelAnimationFrame(timerRef.current);
@@ -70,7 +97,6 @@ const Quiz = () => {
     startTimeRef.current = Date.now();
     lastUpdateTimeRef.current = null;
     
-    // Start the timer animation
     if (!isGameOver && !selectedAnswer) {
       animateTimer();
     }
@@ -83,32 +109,27 @@ const Quiz = () => {
     
     const now = Date.now();
     const elapsed = now - startTimeRef.current;
-    const totalDuration = 20000; // 20 seconds in milliseconds
+    const totalDuration = 20000;
     
-    // Calculate new percentage and time remaining
     const newPercent = Math.max(0, 100 - (elapsed / totalDuration) * 100);
     const newTimeRemaining = Math.max(0, Math.ceil((totalDuration - elapsed) / 1000));
     
     setTimerPercent(newPercent);
     
-    // Only update the displayed time when it changes (once per second)
     if (newTimeRemaining !== timeRemaining) {
       setTimeRemaining(newTimeRemaining);
     }
     
-    // Check if timer has reached zero
     if (newPercent <= 0) {
       handleTimeUp();
       return;
     }
     
-    // Continue animation
     if (!isGameOver && !selectedAnswer) {
       timerRef.current = requestAnimationFrame(animateTimer);
     }
   };
 
-  // Clean up timer animation on component unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) {
@@ -117,21 +138,17 @@ const Quiz = () => {
     };
   }, []);
 
-  // Start or stop timer based on game state
   useEffect(() => {
     if (loading || isGameOver || selectedAnswer) {
-      // Stop the timer
       if (timerRef.current) {
         cancelAnimationFrame(timerRef.current);
         timerRef.current = null;
       }
     } else if (!timerRef.current && !isGameOver && !selectedAnswer) {
-      // Start the timer
       resetTimer();
     }
   }, [currentQuestionIndex, loading, isGameOver, selectedAnswer]);
 
-  // Handle time running out
   const handleTimeUp = () => {
     if (timerRef.current) {
       cancelAnimationFrame(timerRef.current);
@@ -139,10 +156,9 @@ const Quiz = () => {
     }
     
     const currentQuestion = shuffledQuestions[currentQuestionIndex];
-    setSelectedAnswer(currentQuestion.answer); // Show correct answer
+    setSelectedAnswer(currentQuestion.answer);
     setIsCorrect(false);
     
-    // Trigger life loss animation
     triggerLifeLossAnimation();
     
     setTimeout(() => {
@@ -155,38 +171,32 @@ const Quiz = () => {
       }
     }, 1500);
   };
-  
-  // Animate opponent actions appearance
+
   useEffect(() => {
     if (shuffledQuestions.length > 0 && currentQuestionIndex < shuffledQuestions.length) {
       const currentQuestion = shuffledQuestions[currentQuestionIndex];
       if (!currentQuestion.opponent_actions) return;
 
-      // Clear any existing timeouts
       const timeoutIds: number[] = [];
       
-      // Show opponents one by one with delay
       currentQuestion.opponent_actions.forEach((_, index) => {
         const timeoutId = window.setTimeout(() => {
           setVisibleOpponents(prev => [...prev, index]);
-        }, 200 * index); // 0.2 second delay between each
+        }, 200 * index);
         timeoutIds.push(timeoutId);
       });
 
-      // Cleanup function to clear timeouts if component unmounts or question changes
       return () => {
         timeoutIds.forEach(id => window.clearTimeout(id));
       };
     }
   }, [currentQuestionIndex, shuffledQuestions]);
 
-  // Trigger life loss animation
   const triggerLifeLossAnimation = () => {
-    setLostLifeIndex(lives - 1); // Index of the heart being lost
+    setLostLifeIndex(lives - 1);
     setShowDamageFlash(true);
     setLives(prev => prev - 1);
     
-    // Reset damage flash after animation completes
     setTimeout(() => {
       setShowDamageFlash(false);
       setLostLifeIndex(null);
@@ -202,7 +212,6 @@ const Quiz = () => {
     const correct = answer === currentQuestion.answer;
     setIsCorrect(correct);
     
-    // Stop the timer
     if (timerRef.current) {
       cancelAnimationFrame(timerRef.current);
       timerRef.current = null;
@@ -211,11 +220,9 @@ const Quiz = () => {
     if (correct) {
       setScore(prevScore => prevScore + 1);
     } else {
-      // Trigger life loss animation for wrong answer
       triggerLifeLossAnimation();
     }
     
-    // Move to next question after delay
     setTimeout(() => {
       if (!correct && lives <= 1) {
         setIsGameOver(true);
@@ -224,27 +231,24 @@ const Quiz = () => {
       } else if (currentQuestionIndex < shuffledQuestions.length - 1) {
         moveToNextQuestion();
       } else {
-        // Quiz completed
         setIsGameOver(true);
         setShowGameOverDialog(true);
         handleGameCompletion();
       }
     }, 1500);
   };
-  
+
   const moveToNextQuestion = () => {
     setCurrentQuestionIndex(prevIndex => prevIndex + 1);
     setSelectedAnswer(null);
     setIsCorrect(null);
-    setVisibleOpponents([]); 
-    resetTimer(); // Reset timer for next question
+    setVisibleOpponents([]);
+    resetTimer();
   };
-  
+
   const handleGameCompletion = () => {
-    // Record that a gameplay loop has been completed
     const loopCount = recordGameplayLoop();
     
-    // If user is logged in, submit their score to the leaderboard
     if (user) {
       submitScoreToLeaderboard(user.id, 'quiz-one', score)
         .then(wasHighScore => {
@@ -253,15 +257,12 @@ const Quiz = () => {
           }
         });
     } else if (shouldPromptLogin()) {
-      // Show login prompt based on gameplay count
       setShowLoginPrompt(true);
     }
   };
-  
+
   const restartQuiz = () => {
-    // Reshuffle questions
     setShuffledQuestions(shuffleArray([...originalQuestions]));
-    // Reset state
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setIsCorrect(null);
@@ -274,7 +275,12 @@ const Quiz = () => {
     setShowGameOverDialog(false);
   };
 
-  // Render the current question
+  const handleOnboardingComplete = () => {
+    if (!isGameOver && !selectedAnswer) {
+      resetTimer();
+    }
+  };
+
   const renderCurrentQuestion = () => {
     if (loading || shuffledQuestions.length === 0 || currentQuestionIndex >= shuffledQuestions.length) {
       return null;
@@ -286,13 +292,15 @@ const Quiz = () => {
       <div className="w-full h-full flex flex-col items-center">
         <h1 className="text-2xl font-bold text-amber-400 mb-2">Poker Quiz</h1>
         
-        {/* Competitive mode UI - timer and lives */}
+        <OnboardingOverlay 
+          tooltips={quizOneTooltips}
+          onComplete={handleOnboardingComplete}
+        />
+        
         <div className="w-full max-w-lg mb-4 flex justify-between items-center">
           <div className="flex items-center gap-1">
             {[...Array(3)].map((_, i) => {
-              // Determine if this heart is the one being lost
               const isCurrentlyLost = lostLifeIndex === i;
-              // Determine if this heart should be displayed (still has lives)
               const isActive = i < lives || isCurrentlyLost;
               
               return (
@@ -301,7 +309,6 @@ const Quiz = () => {
                   className={`relative ${isCurrentlyLost ? 'animate-none' : ''}`}
                 >
                   {isCurrentlyLost ? (
-                    // Animated broken heart that falls and fades
                     <>
                       <div className="absolute">
                         <HeartCrack 
@@ -313,7 +320,6 @@ const Quiz = () => {
                       </div>
                     </>
                   ) : (
-                    // Regular heart
                     <Heart 
                       className={`h-6 w-6 ${isActive ? 'text-red-500 fill-red-500' : 'text-gray-400'}`}
                     />
@@ -335,7 +341,6 @@ const Quiz = () => {
           </div>
         </div>
         
-        {/* Damage flash overlay */}
         {showDamageFlash && (
           <div 
             className="fixed inset-0 bg-red-500 bg-opacity-30 pointer-events-none z-50 animate-fade-in"
@@ -345,7 +350,6 @@ const Quiz = () => {
           ></div>
         )}
         
-        {/* Poker table with cards and actions */}
         <PokerTable 
           cards={currentQuestion.cards}
           userPosition={userPosition}
@@ -353,7 +357,6 @@ const Quiz = () => {
           visibleOpponents={visibleOpponents}
         />
         
-        {/* Question and answers */}
         <div className="w-full max-w-lg">
           <h2 className="text-lg font-medium mb-3 text-center">
             {currentQuestion.question}
@@ -426,7 +429,6 @@ const Quiz = () => {
           ) : renderCurrentQuestion()}
         </div>
         
-        {/* Game Over Dialog */}
         <Dialog open={showGameOverDialog} onOpenChange={setShowGameOverDialog}>
           <DialogContent className="bg-stone-800 border-amber-500">
             <DialogHeader>

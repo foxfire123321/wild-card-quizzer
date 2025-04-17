@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import LoginPrompt from "@/components/LoginPrompt";
 import {
@@ -24,11 +23,14 @@ const PokerPersonalityQuiz = () => {
   const [currentAnswer, setCurrentAnswer] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   
-  // Check if user is logged in
+  // Check if user is logged in and set preview mode accordingly
   useEffect(() => {
-    if (!isLoading && !user) {
-      setShowLoginPrompt(true);
+    if (!isLoading) {
+      if (!user) {
+        setIsPreviewMode(true);
+      }
     }
   }, [user, isLoading]);
   
@@ -43,6 +45,19 @@ const PokerPersonalityQuiz = () => {
     const currentQuestion = quizQuestions[currentQuestionIndex];
     const selectedAnswerIndex = parseInt(currentAnswer);
     const personalityType = currentQuestion.answers[selectedAnswerIndex].personality;
+    
+    // If in preview mode and this is the first question, show login prompt
+    if (isPreviewMode && currentQuestionIndex === 0) {
+      // Add visual transition first
+      setIsTransitioning(true);
+      
+      setTimeout(() => {
+        setShowLoginPrompt(true);
+        setIsTransitioning(false);
+      }, 300);
+      
+      return;
+    }
     
     // Add the personality type to the selected answers
     const newSelectedAnswers = [...selectedAnswers, personalityType];
@@ -125,31 +140,23 @@ const PokerPersonalityQuiz = () => {
                 {currentQuestion.question}
               </h2>
               
-              <RadioGroup 
-                value={currentAnswer || ""}
-                onValueChange={handleAnswerSelect}
-                className="space-y-4"
-              >
+              {/* New button-style answer options */}
+              <div className="space-y-3">
                 {currentQuestion.answers.map((answer, index) => (
-                  <div 
+                  <Button
                     key={index}
-                    className="flex items-start space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"
+                    variant="outline"
+                    className={`w-full justify-start text-left py-4 px-4 h-auto whitespace-normal ${
+                      currentAnswer === index.toString() 
+                        ? 'bg-amber-100 border-amber-400 text-amber-800' 
+                        : 'border-gray-200 text-gray-700 hover:bg-amber-50'
+                    }`}
                     onClick={() => handleAnswerSelect(index.toString())}
                   >
-                    <RadioGroupItem 
-                      value={index.toString()} 
-                      id={`answer-${index}`} 
-                      className="mt-1"
-                    />
-                    <label 
-                      htmlFor={`answer-${index}`} 
-                      className="cursor-pointer w-full text-gray-700"
-                    >
-                      {answer.text}
-                    </label>
-                  </div>
+                    {answer.text}
+                  </Button>
                 ))}
-              </RadioGroup>
+              </div>
             </CardContent>
           </Card>
           
@@ -157,7 +164,7 @@ const PokerPersonalityQuiz = () => {
             <Button 
               onClick={() => navigate('/')}
               variant="outline" 
-              className="border-poker-gold text-poker-gold"
+              className="border-amber-400 text-amber-400"
             >
               Back to Menu
             </Button>
@@ -165,7 +172,7 @@ const PokerPersonalityQuiz = () => {
             <Button 
               onClick={handleNextQuestion}
               disabled={currentAnswer === null}
-              className="bg-poker-gold hover:bg-amber-600 text-white"
+              className="bg-amber-400 hover:bg-amber-500 text-black"
             >
               {currentQuestionIndex < quizQuestions.length - 1 ? 'Next Question' : 'See Results'}
             </Button>
@@ -175,7 +182,7 @@ const PokerPersonalityQuiz = () => {
       
       {showLoginPrompt && (
         <LoginPrompt
-          message="Please sign in to take the Poker Personality Quiz"
+          message="Log in to unlock your poker personality."
           returnPath="/poker-personality-quiz"
           onClose={() => navigate('/')}
         />
