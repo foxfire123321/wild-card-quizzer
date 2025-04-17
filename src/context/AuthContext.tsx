@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -68,10 +67,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = async () => {
     try {
       console.log("Initiating Google sign in");
+      
+      // Get the current URL, ensuring we use the deployed URL not localhost
+      const currentUrl = window.location.href;
+      const isLocalhost = currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1');
+      
+      // If we're on localhost during development, use the preview URL
+      // Otherwise use the current origin
+      const redirectUrl = isLocalhost 
+        ? 'https://f545faf7-7f9a-4d82-841b-7117ee1178cf.lovableproject.com/'
+        : `${window.location.origin}/`;
+      
+      console.log("Using redirect URL:", redirectUrl);
+      
       const { error, data } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

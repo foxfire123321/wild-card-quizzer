@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -7,9 +8,20 @@ const Auth = () => {
   const { user, isLoading, signInWithGoogle, signInWithApple } = useAuth();
   const navigate = useNavigate();
   const [authInProgress, setAuthInProgress] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("Auth page mounted. User:", user?.email, "Loading:", isLoading);
+    
+    // Check for URL error parameters that might be returned from OAuth provider
+    const url = new URL(window.location.href);
+    const error = url.searchParams.get("error");
+    const errorDescription = url.searchParams.get("error_description");
+    
+    if (error) {
+      console.error("Auth error:", error, errorDescription);
+      setErrorMessage(errorDescription || "Authentication failed");
+    }
     
     if (user && !isLoading) {
       console.log("User authenticated, navigating to home");
@@ -19,6 +31,7 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     console.log("Google sign in button clicked");
+    setErrorMessage(null);
     setAuthInProgress(true);
     await signInWithGoogle();
     // Don't reset authInProgress since we want to keep showing loading state
@@ -27,6 +40,7 @@ const Auth = () => {
 
   const handleAppleSignIn = async () => {
     console.log("Apple sign in button clicked");
+    setErrorMessage(null);
     setAuthInProgress(true);
     await signInWithApple();
     // Don't reset authInProgress for the same reason
@@ -53,6 +67,12 @@ const Auth = () => {
           login
         </h2>
       </div>
+      
+      {errorMessage && (
+        <div className="w-full max-w-md mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
+          <p>{errorMessage}</p>
+        </div>
+      )}
       
       <div className="w-full max-w-md space-y-4">
         <Button 
