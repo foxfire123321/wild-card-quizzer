@@ -51,7 +51,7 @@ export const quizQuestions: QuizQuestion[] = [
       { text: "Slow play it. Trap someone and stack 'em.", personality: "Shark" },
       { text: "Min-raise. No reason to scare them off yet.", personality: "Wizard" },
       { text: "Slam a huge raise. You want action, now.", personality: "Gambler" },
-      { text: "Make eye contact, smile, and say "Let's play."", personality: "Chat Pro" }
+      { text: "Make eye contact, smile, and say \"Let's play.\"", personality: "Chat Pro" }
     ]
   },
   {
@@ -79,9 +79,9 @@ export const quizQuestions: QuizQuestion[] = [
     question: "You pull off a huge bluff and everyone at the table is staring at you. What do you do?",
     answers: [
       { text: "Stay ice cold. No reaction. Let them wonder.", personality: "Shark" },
-      { text: "Laugh and say "Had it the whole way."", personality: "Chat Pro" },
+      { text: "Laugh and say \"Had it the whole way.\"", personality: "Chat Pro" },
       { text: "Fire again. Momentum is everything.", personality: "Gambler" },
-      { text: "Make a weird face and ask, "Wanna see?"", personality: "Wildcard" }
+      { text: "Make a weird face and ask, \"Wanna see?\"", personality: "Wildcard" }
     ]
   },
   {
