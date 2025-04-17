@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -28,10 +29,9 @@ const QuizTwo = () => {
         const savedIndex = await getQuizProgress("quiz-two");
         if (savedIndex !== null && savedIndex >= 0) {
           setCurrentQuestionIndex(savedIndex);
-          if (savedIndex > 0) {
-            setScore(savedIndex); // Assume all previous questions were correct
-            toast.info(`Welcome back! Continuing from question ${savedIndex + 1}`);
-          }
+          // We no longer assume all previous questions were correct
+          // The score will start at 0 and be calculated separately
+          toast.info(`Welcome back! Continuing from question ${savedIndex + 1}`);
         }
         setIsProgressLoaded(true);
       } else if (!isLoading) {

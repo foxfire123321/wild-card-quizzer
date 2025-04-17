@@ -2,10 +2,18 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isLoading } = useAuth();
+  
+  // Redirect unauthenticated users to auth page
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, isLoading, navigate]);
 
   const handleStartQuiz = () => {
     navigate("/quiz");
@@ -22,6 +30,16 @@ const Index = () => {
       navigate("/auth");
     }
   };
+  
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
+        <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
