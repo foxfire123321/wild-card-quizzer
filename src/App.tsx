@@ -16,6 +16,7 @@ import PokerLogDetails from "./pages/PokerLogDetails";
 import PokerPersonalityQuiz from "./pages/PokerPersonalityQuiz";
 import PokerPersonalityResult from "./pages/PokerPersonalityResult";
 import Leaderboard from "./pages/Leaderboard";
+import Achievements from "./pages/Achievements";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,6 +62,7 @@ const App = () => {
               <Route path="/quiz" element={<Quiz />} />
               <Route path="/quiz-two" element={<QuizTwo />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/achievements" element={<Achievements />} />
               <Route path="/poker-companion" element={<PokerCompanion />} />
               <Route path="/poker-companion/create" element={
                 <ProtectedRoute>

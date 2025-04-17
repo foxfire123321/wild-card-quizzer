@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
-import { Award } from "lucide-react";
+import { Award, Trophy } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -43,6 +43,10 @@ const Index = () => {
     navigate("/leaderboard");
   };
   
+  const handleAchievements = () => {
+    navigate("/achievements");
+  };
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
@@ -54,8 +58,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
-      {/* Leaderboard button */}
-      <div className="absolute top-4 right-4">
+      {/* Buttons container for Leaderboard and Achievements */}
+      <div className="absolute top-4 right-4 flex gap-2">
+        <Button
+          onClick={handleAchievements}
+          variant="outline"
+          className="rounded-full p-2 h-10 w-10 border-amber-400 text-amber-400 hover:bg-amber-100"
+        >
+          <Trophy className="h-5 w-5" />
+        </Button>
         <Button
           onClick={handleLeaderboard}
           variant="outline"
@@ -65,7 +76,7 @@ const Index = () => {
         </Button>
       </div>
       
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 mt-[-10vh]"> {/* Added negative margin to move content up */}
         <h1 className="text-amber-500 text-4xl md:text-5xl font-bold mb-2">
           poker gone wild
         </h1>
@@ -76,7 +87,7 @@ const Index = () => {
       
       <div className="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-amber-500 flex items-center justify-center mb-12 overflow-hidden">
         <img 
-          src="/lovable-uploads/1fcdc667-e288-446c-8967-7bdc58f5d993.png" 
+          src="/logo.jpg" 
           alt="Poker Gone Wild Logo" 
           className="w-full h-full object-cover" 
         />
