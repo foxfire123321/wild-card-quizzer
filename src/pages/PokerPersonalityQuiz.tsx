@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import {
 const PokerPersonalityQuiz = () => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<PersonalityType[]>([]);
@@ -27,7 +27,7 @@ const PokerPersonalityQuiz = () => {
   useEffect(() => {
     if (!isLoading && !user) {
       toast.error("Please log in to take the quiz");
-      navigate("/auth");
+      navigate("/auth", { state: { returnTo: "/poker-personality-quiz" } });
     }
   }, [user, isLoading, navigate]);
   
@@ -90,6 +90,38 @@ const PokerPersonalityQuiz = () => {
       <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
         <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full"></div>
         <p className="mt-4 text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center">
+            <h2 className="text-xl font-bold mb-4 text-gray-800">
+              Login Required
+            </h2>
+            <p className="mb-6 text-gray-600">
+              You need to be logged in to take the Poker Personality Quiz.
+            </p>
+            <div className="flex justify-center gap-4">
+              <Button
+                onClick={() => navigate("/")}
+                variant="outline"
+                className="border-poker-gold text-poker-gold"
+              >
+                Back to Menu
+              </Button>
+              <Button
+                onClick={() => navigate("/auth", { state: { returnTo: "/poker-personality-quiz" } })}
+                className="bg-poker-gold hover:bg-amber-600 text-white"
+              >
+                Log In
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

@@ -15,6 +15,7 @@ import CreatePokerLog from "./pages/CreatePokerLog";
 import PokerLogDetails from "./pages/PokerLogDetails";
 import PokerPersonalityQuiz from "./pages/PokerPersonalityQuiz";
 import PokerPersonalityResult from "./pages/PokerPersonalityResult";
+import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,21 +58,9 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/quiz" element={
-                <ProtectedRoute>
-                  <Quiz />
-                </ProtectedRoute>
-              } />
-              <Route path="/quiz-two" element={
-                <ProtectedRoute>
-                  <QuizTwo />
-                </ProtectedRoute>
-              } />
-              <Route path="/poker-companion" element={
-                <ProtectedRoute>
-                  <PokerCompanion />
-                </ProtectedRoute>
-              } />
+              <Route path="/quiz" element={<Quiz />} />
+              <Route path="/quiz-two" element={<QuizTwo />} />
+              <Route path="/poker-companion" element={<PokerCompanion />} />
               <Route path="/poker-companion/create" element={
                 <ProtectedRoute>
                   <CreatePokerLog />
@@ -82,16 +71,9 @@ const App = () => {
                   <PokerLogDetails />
                 </ProtectedRoute>
               } />
-              <Route path="/poker-personality-quiz" element={
-                <ProtectedRoute>
-                  <PokerPersonalityQuiz />
-                </ProtectedRoute>
-              } />
-              <Route path="/poker-personality-result" element={
-                <ProtectedRoute>
-                  <PokerPersonalityResult />
-                </ProtectedRoute>
-              } />
+              <Route path="/poker-personality-quiz" element={<PokerPersonalityQuiz />} />
+              <Route path="/poker-personality-result" element={<PokerPersonalityResult />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
