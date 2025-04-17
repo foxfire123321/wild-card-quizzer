@@ -82,7 +82,7 @@ const Index = () => {
         <img 
           src="/lovable-uploads/e8021b21-2114-4ae3-b56a-79511e5a38bf.png" 
           alt="Poker Gone Wild Logo" 
-          className="w-full h-full object-contain p-2" 
+          className="w-full h-full object-contain scale-110" 
         />
       </div>
       
