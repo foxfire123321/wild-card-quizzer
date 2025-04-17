@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export async function saveQuizProgress(quizId: string, questionIndex: number) {
+export async function saveQuizProgress(quizId: string, questionIndex: number, score: number) {
   const { data: user } = await supabase.auth.getUser();
   
   if (!user.user) {
@@ -16,6 +16,7 @@ export async function saveQuizProgress(quizId: string, questionIndex: number) {
         user_id: user.user.id,
         quiz_id: quizId,
         last_question_index: questionIndex,
+        score: score, // Store score separately
         updated_at: new Date().toISOString() // Convert Date to ISO string
       },
       { onConflict: "user_id,quiz_id" }
@@ -38,7 +39,7 @@ export async function getQuizProgress(quizId: string) {
   
   const { data, error } = await supabase
     .from("quiz_progress")
-    .select("last_question_index")
+    .select("last_question_index, score")
     .eq("user_id", user.user.id)
     .eq("quiz_id", quizId)
     .single();
@@ -48,5 +49,5 @@ export async function getQuizProgress(quizId: string) {
     console.error("Error getting quiz progress:", error);
   }
   
-  return data ? data.last_question_index : 0;
+  return data ? { lastQuestionIndex: data.last_question_index, score: data.score || 0 } : { lastQuestionIndex: 0, score: 0 };
 }

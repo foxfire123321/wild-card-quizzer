@@ -25,16 +25,12 @@ const QuizTwo = () => {
   useEffect(() => {
     const loadProgress = async () => {
       if (user) {
-        const savedIndex = await getQuizProgress("quiz-two");
-        if (savedIndex !== null && savedIndex >= 0) {
-          setCurrentQuestionIndex(savedIndex);
+        const savedProgress = await getQuizProgress("quiz-two");
+        if (savedProgress && savedProgress.lastQuestionIndex >= 0) {
+          setCurrentQuestionIndex(savedProgress.lastQuestionIndex);
+          setScore(savedProgress.score); // Load the actual saved score
           
-          // Calculate score based on the progress - we'll count questions before current index
-          // This assumes that if they're at question X, they've correctly answered X-1 questions
-          if (savedIndex > 0) {
-            setScore(savedIndex);
-            toast.info(`Welcome back! Continuing from question ${savedIndex + 1}`);
-          }
+          toast.info(`Welcome back! Continuing from question ${savedProgress.lastQuestionIndex + 1} with score ${savedProgress.score}`);
         }
         setIsProgressLoaded(true);
       } else if (!isLoading) {
@@ -89,8 +85,10 @@ const QuizTwo = () => {
     const correct = answer === currentQuestion.answer;
     setIsCorrect(correct);
     
+    // Update score only if correct
+    const newScore = correct ? score + 1 : score;
     if (correct) {
-      setScore(prevScore => prevScore + 1);
+      setScore(newScore);
     }
     
     // Move to next question after delay
@@ -103,15 +101,15 @@ const QuizTwo = () => {
         setVisibleOpponents([]); // Reset visible opponents for the new question
         
         if (user) {
-          // Save progress after moving to next question
-          await saveQuizProgress("quiz-two", nextIndex);
+          // Save progress after moving to next question, including accurate score
+          await saveQuizProgress("quiz-two", nextIndex, newScore);
         }
       } else {
         // Quiz completed
         toast.success("Quiz completed!");
         if (user) {
-          // Save completion (could reset to 0 or keep at last index)
-          await saveQuizProgress("quiz-two", currentQuestionIndex);
+          // Save completion with final score
+          await saveQuizProgress("quiz-two", currentQuestionIndex, newScore);
         }
       }
     }, 1500);
