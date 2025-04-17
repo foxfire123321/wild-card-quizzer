@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +8,12 @@ import PokerTable from "@/components/poker/PokerTable";
 import AnswerOptions from "@/components/poker/AnswerOptions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useQuizData, extractUserPosition, Question, shuffleArray } from "@/utils/quizUtils";
+import { LivesDisplay } from "@/components/poker/LivesDisplay";
+import { useAuth } from "@/context/AuthContext";
+import { recordGameplayLoop, shouldPromptLogin } from "@/utils/gameplayUtils";
+import LoginPrompt from "@/components/LoginPrompt";
+import { submitScoreToLeaderboard } from "@/utils/leaderboardUtils";
+import { toast } from "sonner";
 
 const Quiz = () => {
   const { questions: originalQuestions, loading, error } = useQuizData();
@@ -27,6 +32,7 @@ const Quiz = () => {
   const [lives, setLives] = useState(3);
   const [isGameOver, setIsGameOver] = useState(false);
   const [showGameOverDialog, setShowGameOverDialog] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   
   // Animation states
   const [showDamageFlash, setShowDamageFlash] = useState(false);
@@ -34,6 +40,8 @@ const Quiz = () => {
   const timerRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const lastUpdateTimeRef = useRef<number | null>(null);
+  
+  const { user } = useAuth();
 
   // Shuffle questions when they load
   useEffect(() => {
@@ -141,6 +149,7 @@ const Quiz = () => {
       if (lives <= 1) {
         setIsGameOver(true);
         setShowGameOverDialog(true);
+        handleGameCompletion();
       } else {
         moveToNextQuestion();
       }
@@ -211,12 +220,14 @@ const Quiz = () => {
       if (!correct && lives <= 1) {
         setIsGameOver(true);
         setShowGameOverDialog(true);
+        handleGameCompletion();
       } else if (currentQuestionIndex < shuffledQuestions.length - 1) {
         moveToNextQuestion();
       } else {
         // Quiz completed
         setIsGameOver(true);
         setShowGameOverDialog(true);
+        handleGameCompletion();
       }
     }, 1500);
   };
@@ -227,6 +238,24 @@ const Quiz = () => {
     setIsCorrect(null);
     setVisibleOpponents([]); 
     resetTimer(); // Reset timer for next question
+  };
+  
+  const handleGameCompletion = () => {
+    // Record that a gameplay loop has been completed
+    const loopCount = recordGameplayLoop();
+    
+    // If user is logged in, submit their score to the leaderboard
+    if (user) {
+      submitScoreToLeaderboard(user.id, 'quiz-one', score)
+        .then(wasHighScore => {
+          if (wasHighScore) {
+            toast.success("New high score submitted to leaderboard!");
+          }
+        });
+    } else if (shouldPromptLogin()) {
+      // Show login prompt based on gameplay count
+      setShowLoginPrompt(true);
+    }
   };
   
   const restartQuiz = () => {
@@ -356,66 +385,94 @@ const Quiz = () => {
   };
 
   return (
-    <div className="min-h-screen quiz-theme p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-400">Loading questions...</p>
-          </div>
-        ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-red-500">{error}</p>
-            <Button 
-              className="mt-4 bg-amber-400 hover:bg-amber-500 text-black"
-              onClick={() => window.location.reload()}
-            >
-              Try Again
-            </Button>
-          </div>
-        ) : (
-          renderCurrentQuestion()
-        )}
+    <>
+      <div className="min-h-screen quiz-theme p-4 md:p-8">
+        <div className="max-w-3xl mx-auto">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-gray-400">Loading questions...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500">{error}</p>
+              <Button 
+                className="mt-4 bg-amber-400 hover:bg-amber-500 text-black"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : isGameOver ? (
+            <div className="text-center py-12">
+              <p className="text-amber-500 text-2xl font-bold mb-4">
+                {lives > 0 ? "Quiz Complete!" : "Game Over!"}
+              </p>
+              <p className="text-xl mb-6">Final Score: {score}</p>
+              <Button 
+                className="bg-amber-400 hover:bg-amber-500 text-black mr-4"
+                onClick={restartQuiz}
+              >
+                Play Again
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-amber-400 text-amber-400"
+                onClick={() => navigate('/')}
+              >
+                Back to Home
+              </Button>
+            </div>
+          ) : renderCurrentQuestion()}
+        </div>
+        
+        {/* Game Over Dialog */}
+        <Dialog open={showGameOverDialog} onOpenChange={setShowGameOverDialog}>
+          <DialogContent className="bg-stone-800 border-amber-500">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl text-amber-400">
+                {isGameOver && currentQuestionIndex >= shuffledQuestions.length - 1 
+                  ? "Quiz Complete!" 
+                  : "Game Over!"}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="py-4 text-center">
+              <p className="text-xl mb-2">Final Score: {score}</p>
+              <p className="text-gray-300 mb-4">
+                {lives > 0 
+                  ? "Congratulations! You completed the quiz." 
+                  : "You've run out of lives!"}
+              </p>
+              <Button 
+                className="bg-amber-400 hover:bg-amber-500 text-black w-full"
+                onClick={restartQuiz}
+              >
+                Play Again
+              </Button>
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate('/')}
+              >
+                Back to Home
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-      
-      {/* Game Over Dialog */}
-      <Dialog open={showGameOverDialog} onOpenChange={setShowGameOverDialog}>
-        <DialogContent className="bg-stone-800 border-amber-500">
-          <DialogHeader>
-            <DialogTitle className="text-center text-2xl text-amber-400">
-              {isGameOver && currentQuestionIndex >= shuffledQuestions.length - 1 
-                ? "Quiz Complete!" 
-                : "Game Over!"}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="py-4 text-center">
-            <p className="text-xl mb-2">Final Score: {score}</p>
-            <p className="text-gray-300 mb-4">
-              {lives > 0 
-                ? "Congratulations! You completed the quiz." 
-                : "You've run out of lives!"}
-            </p>
-            <Button 
-              className="bg-amber-400 hover:bg-amber-500 text-black w-full"
-              onClick={restartQuiz}
-            >
-              Play Again
-            </Button>
-          </div>
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => navigate('/')}
-            >
-              Back to Home
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+
+      {showLoginPrompt && (
+        <LoginPrompt
+          message="Sign in to save your progress and appear on the leaderboard!"
+          returnPath="/quiz"
+          onClose={() => setShowLoginPrompt(false)}
+        />
+      )}
+    </>
   );
 };
 

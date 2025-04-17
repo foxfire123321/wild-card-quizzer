@@ -1,13 +1,14 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import PokerTable from "@/components/poker/PokerTable";
 import AnswerOptions from "@/components/poker/AnswerOptions";
 import { useQuizData, extractUserPosition, Question } from "@/utils/quizUtils";
 import { saveQuizProgress, getQuizProgress } from "@/utils/progressUtils";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import LoginPrompt from "@/components/LoginPrompt";
 
 const QuizTwo = () => {
   const { questions: originalQuestions, loading, error } = useQuizData();
@@ -19,6 +20,7 @@ const QuizTwo = () => {
   const [visibleOpponents, setVisibleOpponents] = useState<number[]>([]);
   const { user, isLoading } = useAuth();
   const [isProgressLoaded, setIsProgressLoaded] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const navigate = useNavigate();
 
   // Load saved progress when component mounts
@@ -33,17 +35,16 @@ const QuizTwo = () => {
           toast.info(`Welcome back! Continuing from question ${savedProgress.lastQuestionIndex + 1} with score ${savedProgress.score}`);
         }
         setIsProgressLoaded(true);
-      } else if (!isLoading) {
-        // If not logged in and not loading, redirect to auth
-        toast.error("Please sign in to access Quiz Two");
-        navigate("/auth");
+      } else {
+        // If not logged in, start from beginning but still allow play
+        setIsProgressLoaded(true);
       }
     };
 
     if (!isLoading) {
       loadProgress();
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading]);
 
   // When questions load or current question changes, update the user position
   useEffect(() => {
@@ -110,6 +111,9 @@ const QuizTwo = () => {
         if (user) {
           // Save completion with final score
           await saveQuizProgress("quiz-two", currentQuestionIndex, newScore);
+        } else {
+          // Prompt user to login to save progress
+          setShowLoginPrompt(true);
         }
       }
     }, 1500);
@@ -168,7 +172,7 @@ const QuizTwo = () => {
   };
 
   // Show loading when either auth is loading or progress is being loaded
-  if (isLoading || (user && !isProgressLoaded)) {
+  if (isLoading || !isProgressLoaded) {
     return (
       <div className="min-h-screen quiz-theme p-4 md:p-8 flex items-center justify-center">
         <div className="text-center">
@@ -180,28 +184,38 @@ const QuizTwo = () => {
   }
 
   return (
-    <div className="min-h-screen quiz-theme p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-400">Loading questions...</p>
-          </div>
-        ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-red-500">{error}</p>
-            <Button 
-              className="mt-4 bg-amber-400 hover:bg-amber-500 text-black"
-              onClick={() => window.location.reload()}
-            >
-              Try Again
-            </Button>
-          </div>
-        ) : (
-          renderCurrentQuestion()
-        )}
+    <>
+      <div className="min-h-screen quiz-theme p-4 md:p-8">
+        <div className="max-w-3xl mx-auto">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-gray-400">Loading questions...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500">{error}</p>
+              <Button 
+                className="mt-4 bg-amber-400 hover:bg-amber-500 text-black"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : (
+            renderCurrentQuestion()
+          )}
+        </div>
       </div>
-    </div>
+      
+      {showLoginPrompt && (
+        <LoginPrompt
+          message="Your progress won't be saved unless you log in."
+          returnPath="/quiz-two"
+          onClose={() => setShowLoginPrompt(false)}
+        />
+      )}
+    </>
   );
 };
 

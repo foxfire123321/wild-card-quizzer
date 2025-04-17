@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
+import LoginPrompt from "@/components/LoginPrompt";
 import {
   QuizQuestion,
   PersonalityType,
@@ -22,14 +23,14 @@ const PokerPersonalityQuiz = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<PersonalityType[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   
-  // Redirect to auth if not logged in
+  // Check if user is logged in
   useEffect(() => {
     if (!isLoading && !user) {
-      toast.error("Please log in to take the quiz");
-      navigate("/auth");
+      setShowLoginPrompt(true);
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading]);
   
   const handleAnswerSelect = (answerId: string) => {
     setCurrentAnswer(answerId);
@@ -97,79 +98,89 @@ const PokerPersonalityQuiz = () => {
   const currentQuestion = quizQuestions[currentQuestionIndex];
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-b from-amber-50 to-amber-100">
-      <div className="w-full max-w-lg">
-        <div className="text-center mb-8">
-          <h1 className="text-poker-gold text-3xl md:text-4xl font-bold mb-2">
-            Poker Personality Quiz
-          </h1>
-          
-          {/* Progress bar */}
-          <div className="w-full bg-amber-100 rounded-full h-2.5 mb-4 mt-6">
-            <div 
-              className="bg-poker-gold h-2.5 rounded-full transition-all duration-300" 
-              style={{ width: `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%` }}
-            ></div>
+    <>
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-b from-amber-50 to-amber-100">
+        <div className="w-full max-w-lg">
+          <div className="text-center mb-8">
+            <h1 className="text-poker-gold text-3xl md:text-4xl font-bold mb-2">
+              Poker Personality Quiz
+            </h1>
+            
+            {/* Progress bar */}
+            <div className="w-full bg-amber-100 rounded-full h-2.5 mb-4 mt-6">
+              <div 
+                className="bg-poker-gold h-2.5 rounded-full transition-all duration-300" 
+                style={{ width: `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%` }}
+              ></div>
+            </div>
+            
+            <p className="text-gray-600">
+              Question {currentQuestionIndex + 1} of {quizQuestions.length}
+            </p>
           </div>
           
-          <p className="text-gray-600">
-            Question {currentQuestionIndex + 1} of {quizQuestions.length}
-          </p>
-        </div>
-        
-        <Card className={`mb-6 transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-          <CardContent className="pt-6">
-            <h2 className="text-xl font-bold mb-6 text-gray-800">
-              {currentQuestion.question}
-            </h2>
-            
-            <RadioGroup 
-              value={currentAnswer || ""}
-              onValueChange={handleAnswerSelect}
-              className="space-y-4"
-            >
-              {currentQuestion.answers.map((answer, index) => (
-                <div 
-                  key={index}
-                  className="flex items-start space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"
-                  onClick={() => handleAnswerSelect(index.toString())}
-                >
-                  <RadioGroupItem 
-                    value={index.toString()} 
-                    id={`answer-${index}`} 
-                    className="mt-1"
-                  />
-                  <label 
-                    htmlFor={`answer-${index}`} 
-                    className="cursor-pointer w-full text-gray-700"
+          <Card className={`mb-6 transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-bold mb-6 text-gray-800">
+                {currentQuestion.question}
+              </h2>
+              
+              <RadioGroup 
+                value={currentAnswer || ""}
+                onValueChange={handleAnswerSelect}
+                className="space-y-4"
+              >
+                {currentQuestion.answers.map((answer, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-start space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"
+                    onClick={() => handleAnswerSelect(index.toString())}
                   >
-                    {answer.text}
-                  </label>
-                </div>
-              ))}
-            </RadioGroup>
-          </CardContent>
-        </Card>
-        
-        <div className="flex justify-between">
-          <Button 
-            onClick={() => navigate('/')}
-            variant="outline" 
-            className="border-poker-gold text-poker-gold"
-          >
-            Back to Menu
-          </Button>
+                    <RadioGroupItem 
+                      value={index.toString()} 
+                      id={`answer-${index}`} 
+                      className="mt-1"
+                    />
+                    <label 
+                      htmlFor={`answer-${index}`} 
+                      className="cursor-pointer w-full text-gray-700"
+                    >
+                      {answer.text}
+                    </label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </CardContent>
+          </Card>
           
-          <Button 
-            onClick={handleNextQuestion}
-            disabled={currentAnswer === null}
-            className="bg-poker-gold hover:bg-amber-600 text-white"
-          >
-            {currentQuestionIndex < quizQuestions.length - 1 ? 'Next Question' : 'See Results'}
-          </Button>
+          <div className="flex justify-between">
+            <Button 
+              onClick={() => navigate('/')}
+              variant="outline" 
+              className="border-poker-gold text-poker-gold"
+            >
+              Back to Menu
+            </Button>
+            
+            <Button 
+              onClick={handleNextQuestion}
+              disabled={currentAnswer === null}
+              className="bg-poker-gold hover:bg-amber-600 text-white"
+            >
+              {currentQuestionIndex < quizQuestions.length - 1 ? 'Next Question' : 'See Results'}
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+      
+      {showLoginPrompt && (
+        <LoginPrompt
+          message="Please sign in to take the Poker Personality Quiz"
+          returnPath="/poker-personality-quiz"
+          onClose={() => navigate('/')}
+        />
+      )}
+    </>
   );
 };
 
