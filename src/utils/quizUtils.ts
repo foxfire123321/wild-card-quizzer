@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 
 export interface OpponentAction {
@@ -68,52 +69,4 @@ export const extractUserPosition = (questionText: string): string => {
     return ['BTN', 'SB', 'BB', 'UTG', 'HJ', 'CO'].includes(position) ? position : 'BTN';
   }
   return 'BTN'; // Default position
-};
-
-// Function to check if user should be prompted to login
-export const shouldPromptLogin = (): boolean => {
-  const today = new Date().toDateString();
-  
-  // Get login prompt data from localStorage
-  const loginPromptData = localStorage.getItem('quizLoginPrompt');
-  let promptCount = 0;
-  let lastPromptDate = '';
-  
-  if (loginPromptData) {
-    const parsedData = JSON.parse(loginPromptData);
-    promptCount = parsedData.count || 0;
-    lastPromptDate = parsedData.date || '';
-  }
-  
-  // Reset counter if it's a new day
-  if (lastPromptDate !== today) {
-    promptCount = 0;
-  }
-  
-  // Check if user should be prompted based on gameplay loop count
-  // First time: prompt after 1 loop
-  // Then: prompt every 4 loops
-  return promptCount === 0 || (promptCount >= 3 && (promptCount - 1) % 4 === 0);
-};
-
-// Function to record a completed gameplay loop
-export const recordGameplayLoop = (): void => {
-  const today = new Date().toDateString();
-  
-  // Get current data
-  const loginPromptData = localStorage.getItem('quizLoginPrompt');
-  let promptCount = 0;
-  
-  if (loginPromptData) {
-    const parsedData = JSON.parse(loginPromptData);
-    // Reset if it's a new day
-    promptCount = parsedData.date === today ? parsedData.count : 0;
-  }
-  
-  // Increment count and save
-  promptCount++;
-  localStorage.setItem('quizLoginPrompt', JSON.stringify({
-    count: promptCount,
-    date: today
-  }));
 };

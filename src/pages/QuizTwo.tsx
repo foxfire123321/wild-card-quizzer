@@ -8,7 +8,6 @@ import { useQuizData, extractUserPosition, Question } from "@/utils/quizUtils";
 import { saveQuizProgress, getQuizProgress } from "@/utils/progressUtils";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import LoginPrompt from "@/components/LoginPrompt";
 
 const QuizTwo = () => {
   const { questions: originalQuestions, loading, error } = useQuizData();
@@ -21,19 +20,21 @@ const QuizTwo = () => {
   const { user, isLoading } = useAuth();
   const [isProgressLoaded, setIsProgressLoaded] = useState(false);
   const navigate = useNavigate();
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+  // Load saved progress when component mounts
   useEffect(() => {
     const loadProgress = async () => {
       if (user) {
         const savedProgress = await getQuizProgress("quiz-two");
         if (savedProgress && savedProgress.lastQuestionIndex >= 0) {
           setCurrentQuestionIndex(savedProgress.lastQuestionIndex);
-          setScore(savedProgress.score);
+          setScore(savedProgress.score); // Load the actual saved score
+          
           toast.info(`Welcome back! Continuing from question ${savedProgress.lastQuestionIndex + 1} with score ${savedProgress.score}`);
         }
         setIsProgressLoaded(true);
       } else if (!isLoading) {
+        // If not logged in and not loading, redirect to auth
         toast.error("Please sign in to access Quiz Two");
         navigate("/auth");
       }
@@ -44,28 +45,33 @@ const QuizTwo = () => {
     }
   }, [user, isLoading, navigate]);
 
+  // When questions load or current question changes, update the user position
   useEffect(() => {
     if (originalQuestions.length > 0 && currentQuestionIndex < originalQuestions.length) {
       const position = extractUserPosition(originalQuestions[currentQuestionIndex].question);
       setUserPosition(position);
-      setVisibleOpponents([]);
+      setVisibleOpponents([]); // Reset visible opponents for the new question
     }
   }, [currentQuestionIndex, originalQuestions]);
 
+  // Animate opponent actions appearance
   useEffect(() => {
     if (originalQuestions.length > 0 && currentQuestionIndex < originalQuestions.length) {
       const currentQuestion = originalQuestions[currentQuestionIndex];
       if (!currentQuestion.opponent_actions) return;
 
+      // Clear any existing timeouts
       const timeoutIds: number[] = [];
       
+      // Show opponents one by one with delay
       currentQuestion.opponent_actions.forEach((_, index) => {
         const timeoutId = window.setTimeout(() => {
           setVisibleOpponents(prev => [...prev, index]);
-        }, 200 * index);
+        }, 200 * index); // 0.2 second delay between each
         timeoutIds.push(timeoutId);
       });
 
+      // Cleanup function to clear timeouts if component unmounts or question changes
       return () => {
         timeoutIds.forEach(id => window.clearTimeout(id));
       };
@@ -79,39 +85,37 @@ const QuizTwo = () => {
     const correct = answer === currentQuestion.answer;
     setIsCorrect(correct);
     
+    // Update score only if correct
     const newScore = correct ? score + 1 : score;
     if (correct) {
       setScore(newScore);
     }
     
+    // Move to next question after delay
     setTimeout(async () => {
       if (currentQuestionIndex < originalQuestions.length - 1) {
         const nextIndex = currentQuestionIndex + 1;
         setCurrentQuestionIndex(nextIndex);
         setSelectedAnswer(null);
         setIsCorrect(null);
-        setVisibleOpponents([]);
+        setVisibleOpponents([]); // Reset visible opponents for the new question
         
         if (user) {
+          // Save progress after moving to next question, including accurate score
           await saveQuizProgress("quiz-two", nextIndex, newScore);
         }
       } else {
+        // Quiz completed
         toast.success("Quiz completed!");
         if (user) {
+          // Save completion with final score
           await saveQuizProgress("quiz-two", currentQuestionIndex, newScore);
-        } else {
-          handleQuizComplete();
         }
       }
     }, 1500);
   };
 
-  const handleQuizComplete = () => {
-    if (!user) {
-      setShowLoginPrompt(true);
-    }
-  };
-
+  // Render the current question
   const renderCurrentQuestion = () => {
     if (loading || originalQuestions.length === 0 || currentQuestionIndex >= originalQuestions.length) {
       return null;
@@ -123,6 +127,7 @@ const QuizTwo = () => {
       <div className="w-full h-full flex flex-col items-center">
         <h1 className="text-2xl font-bold text-amber-400 mb-2">Poker Quiz Two</h1>
         
+        {/* Poker table with cards and actions */}
         <PokerTable 
           cards={currentQuestion.cards}
           userPosition={userPosition}
@@ -130,6 +135,7 @@ const QuizTwo = () => {
           visibleOpponents={visibleOpponents}
         />
         
+        {/* Question and answers */}
         <div className="w-full max-w-lg">
           <h2 className="text-lg font-medium mb-3 text-center">
             {currentQuestion.question}
@@ -141,7 +147,7 @@ const QuizTwo = () => {
             selectedAnswer={selectedAnswer}
             isCorrect={isCorrect}
             onAnswerSelect={handleAnswerSelect}
-            shuffleOptions={false}
+            shuffleOptions={false} // Don't shuffle for Quiz Two
           />
           
           <div className="flex justify-between items-center">
@@ -161,6 +167,7 @@ const QuizTwo = () => {
     );
   };
 
+  // Show loading when either auth is loading or progress is being loaded
   if (isLoading || (user && !isProgressLoaded)) {
     return (
       <div className="min-h-screen quiz-theme p-4 md:p-8 flex items-center justify-center">
@@ -173,38 +180,28 @@ const QuizTwo = () => {
   }
 
   return (
-    <>
-      <div className="min-h-screen quiz-theme p-4 md:p-8">
-        <div className="max-w-3xl mx-auto">
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-gray-400">Loading questions...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-500">{error}</p>
-              <Button 
-                className="mt-4 bg-amber-400 hover:bg-amber-500 text-black"
-                onClick={() => window.location.reload()}
-              >
-                Try Again
-              </Button>
-            </div>
-          ) : (
-            renderCurrentQuestion()
-          )}
-        </div>
+    <div className="min-h-screen quiz-theme p-4 md:p-8">
+      <div className="max-w-3xl mx-auto">
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading questions...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-500">{error}</p>
+            <Button 
+              className="mt-4 bg-amber-400 hover:bg-amber-500 text-black"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </Button>
+          </div>
+        ) : (
+          renderCurrentQuestion()
+        )}
       </div>
-
-      {showLoginPrompt && (
-        <LoginPrompt
-          message="Your progress won't be saved unless you log in. Would you like to sign in now?"
-          returnPath="/quiz-two"
-          onClose={() => setShowLoginPrompt(false)}
-        />
-      )}
-    </>
+    </div>
   );
 };
 

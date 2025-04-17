@@ -1,87 +1,116 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const Auth = () => {
-  const { signInWithGoogle, signInWithApple } = useAuth();
+  const { user, isLoading, signInWithGoogle, signInWithApple } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const returnTo = location.state?.returnTo || '/';
+  const [authInProgress, setAuthInProgress] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleBackToMain = () => {
-    navigate('/');
+  useEffect(() => {
+    console.log("Auth page mounted. User:", user?.email, "Loading:", isLoading);
+    
+    // Check for URL error parameters that might be returned from OAuth provider
+    const url = new URL(window.location.href);
+    const error = url.searchParams.get("error");
+    const errorDescription = url.searchParams.get("error_description");
+    
+    if (error) {
+      console.error("Auth error:", error, errorDescription);
+      setErrorMessage(errorDescription || "Authentication failed");
+    }
+    
+    if (user && !isLoading) {
+      console.log("User authenticated, navigating to home");
+      navigate('/');
+    }
+  }, [user, isLoading, navigate]);
+
+  const handleGoogleSignIn = async () => {
+    console.log("Google sign in button clicked");
+    setErrorMessage(null);
+    setAuthInProgress(true);
+    await signInWithGoogle();
+    // Don't reset authInProgress since we want to keep showing loading state
+    // until we get redirected
   };
 
-  const handleGoogleSignIn = () => {
-    signInWithGoogle()
-      .then(() => {
-        // Navigation back to the original page will happen after the redirect and sign-in process completes
-      })
-      .catch(error => {
-        toast.error("Sign in with Google failed");
-        console.error(error);
-      });
+  const handleAppleSignIn = async () => {
+    console.log("Apple sign in button clicked");
+    setErrorMessage(null);
+    setAuthInProgress(true);
+    await signInWithApple();
+    // Don't reset authInProgress for the same reason
   };
 
-  const handleAppleSignIn = () => {
-    signInWithApple()
-      .then(() => {
-        // Navigation back to the original page will happen after the redirect and sign-in process completes
-      })
-      .catch(error => {
-        toast.error("Sign in with Apple failed");
-        console.error(error);
-      });
-  };
+  if (isLoading || authInProgress) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
+        <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full"></div>
+        <p className="mt-4 text-gray-600">
+          {authInProgress ? "Redirecting to authentication provider..." : "Loading..."}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-amber-50 to-amber-100">
-      <Card className="max-w-md w-full bg-white shadow-xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-poker-gold">Sign In</CardTitle>
-          <CardDescription>
-            Sign in to save your progress and view the leaderboard
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button 
-            className="w-full bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 flex items-center justify-center gap-2"
-            onClick={handleGoogleSignIn}
-          >
-            <svg width="20" height="20" viewBox="0 0 48 48" fill="none">
-              <path fillRule="evenodd" clipRule="evenodd" d="M24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4ZM24.0005 18.3652C25.5633 18.3652 26.9715 18.9053 28.0969 19.8184L32.1622 15.7919C29.7867 13.6414 26.9323 12.4217 24.0005 12.4217C19.4246 12.4217 15.456 14.9759 13.5542 18.7003L18.2598 22.3681C19.1557 20.0092 21.3781 18.3652 24.0005 18.3652ZM32.6411 24.5966C32.6411 23.5225 32.5099 22.5398 32.2427 21.6306L24.0005 21.6304V27.4913H28.8758C28.5723 29.0037 27.6978 30.1795 26.3611 30.9279L30.7685 34.3724C32.9086 32.3865 34.1817 29.6186 34.1817 26.1572C34.1817 25.6254 34.1405 25.1048 34.0622 24.5966H32.6411Z" fill="#4285F4"/>
-              <path fillRule="evenodd" clipRule="evenodd" d="M13.5542 18.7003L18.2598 22.3681C19.1557 20.0092 21.3781 18.3652 24.0005 18.3652V12.4217C19.4246 12.4217 15.456 14.9759 13.5542 18.7003Z" fill="#EA4335"/>
-              <path fillRule="evenodd" clipRule="evenodd" d="M24.0005 35.5783C26.9323 35.5783 29.7867 34.4307 32.1622 32.2802L26.3611 30.9279C25.3049 31.6155 23.9795 32.0348 24.0005 32.0348C21.3781 32.0348 19.1557 30.3908 18.2598 28.0319L13.5542 31.6997C15.456 35.4241 19.4246 35.5783 24.0005 35.5783Z" fill="#34A853"/>
-              <path fillRule="evenodd" clipRule="evenodd" d="M24.0005 12.4217V18.3652C26.9323 18.3652 29.7867 19.5128 32.1622 21.6633L28.0969 25.7898C26.9715 24.8767 25.5633 24.3366 24.0005 24.3366C21.3781 24.3366 19.1557 25.9806 18.2598 28.3395L13.5542 24.6717C15.456 20.9473 19.4246 12.4217 24.0005 12.4217Z" fill="#FBBC05"/>
-            </svg>
-            Continue with Google
-          </Button>
-          
-          <Button 
-            className="w-full bg-black hover:bg-gray-900 text-white flex items-center justify-center gap-2"
-            onClick={handleAppleSignIn}
-          >
-            <svg width="20" height="20" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7.40647 3.99874C7.77368 3.56467 8.26937 3.19738 8.7872 3.15351C8.85455 3.62521 8.70062 4.10546 8.35549 4.49859C8.00452 4.9119 7.52582 5.29333 6.96028 5.24111C6.88009 4.78246 7.07126 4.29541 7.40647 3.99874ZM8.67016 5.49292C7.8952 5.49292 7.6137 5.99565 6.97621 5.99565C6.32695 5.99565 5.95366 5.50242 5.30291 5.50242C4.2989 5.50242 3.0925 6.40472 3.0925 8.18862C3.0925 9.58301 3.63059 11.0279 4.34114 11.9399C4.74097 12.4461 5.20593 13 5.81471 13C6.41344 13 6.64637 12.595 7.37267 12.595C8.11079 12.595 8.29868 13 8.94793 13C9.56831 13 10.0641 12.378 10.464 11.8718C10.9397 11.2653 11.1429 10.6682 11.1524 10.6396C11.1332 10.6301 9.70139 10.0624 9.70139 8.5297C9.70139 7.21342 10.8185 6.63217 10.8862 6.58496C10.2575 5.67265 9.27217 5.5782 8.9562 5.5782C8.86423 5.57918 8.76752 5.58672 8.67016 5.59974V5.49292Z" fill="white" />
-            </svg>
-            Continue with Apple
-          </Button>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <Button 
-            variant="link" 
-            className="text-poker-gold"
-            onClick={handleBackToMain}
-          >
-            Back to Main Menu
-          </Button>
-        </CardFooter>
-      </Card>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
+      <div className="text-center mb-8">
+        <h1 className="text-poker-gold text-4xl md:text-5xl font-bold mb-2">
+          poker gone wild
+        </h1>
+        <h2 className="text-poker-gold text-6xl md:text-7xl font-bold mb-8">
+          login
+        </h2>
+      </div>
+      
+      {errorMessage && (
+        <div className="w-full max-w-md mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
+          <p>{errorMessage}</p>
+        </div>
+      )}
+      
+      <div className="w-full max-w-md space-y-4">
+        <Button 
+          onClick={handleGoogleSignIn}
+          className="w-full bg-white text-gray-800 hover:bg-gray-100 border border-gray-300"
+        >
+          <svg className="mr-2 h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+          </svg>
+          Sign in with Google
+        </Button>
+        
+        <Button 
+          onClick={handleAppleSignIn}
+          className="w-full bg-black text-white hover:bg-gray-800"
+        >
+          <svg className="mr-2 h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z" />
+          </svg>
+          Sign in with Apple
+        </Button>
+        
+        <Button 
+          onClick={() => navigate('/')}
+          variant="outline" 
+          className="w-full mt-4"
+        >
+          Back to Home
+        </Button>
+      </div>
+      
+      <div className="mt-8 text-sm text-gray-600">
+        <p>If you're experiencing login issues, please check:</p>
+        <ul className="list-disc pl-5 mt-2">
+          <li>Your browser isn't blocking third-party cookies</li>
+          <li>The authentication provider is properly configured</li>
+        </ul>
+      </div>
     </div>
   );
 };

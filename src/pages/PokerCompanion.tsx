@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { PlusIcon, ArrowDownUpIcon, HomeIcon } from "lucide-react";
+import { PlusIcon, ArrowDownUpIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface PokerLog {
@@ -61,28 +61,13 @@ const PokerCompanion = () => {
   };
 
   if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <p className="text-xl mb-4">Please log in to view poker logs</p>
-        <Button onClick={() => navigate('/')}>Back to Main Menu</Button>
-      </div>
-    );
+    return <div>Please log in to view poker logs</div>;
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2"
-          >
-            <HomeIcon className="h-4 w-4" />
-            Main Menu
-          </Button>
-          <h1 className="text-3xl font-bold text-poker-brown">Poker Companion</h1>
-        </div>
+        <h1 className="text-3xl font-bold text-poker-brown">Poker Companion</h1>
         <Button variant="outline" onClick={toggleSort}>
           <ArrowDownUpIcon className="mr-2" /> 
           Sort by {sortBy === 'date' ? 'Date' : 'PnL'}

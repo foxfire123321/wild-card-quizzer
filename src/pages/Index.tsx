@@ -2,13 +2,18 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { useEffect, useState } from "react";
-import { Ribbon } from "lucide-react";
+import { useEffect } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading } = useAuth();
   
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, isLoading, navigate]);
+
   const handleStartQuiz = () => {
     navigate("/quiz");
   };
@@ -18,23 +23,11 @@ const Index = () => {
   };
 
   const handlePokerCompanion = () => {
-    if (!user) {
-      if (window.confirm("You need to be logged in to access Poker Companion. Would you like to log in?")) {
-        navigate("/auth", { state: { returnTo: "/poker-companion" } });
-      }
-    } else {
-      navigate("/poker-companion");
-    }
+    navigate("/poker-companion");
   };
   
   const handlePokerPersonalityQuiz = () => {
-    if (!user) {
-      if (window.confirm("You need to be logged in to take the Personality Quiz. Would you like to log in?")) {
-        navigate("/auth", { state: { returnTo: "/poker-personality-quiz" } });
-      }
-    } else {
-      navigate("/poker-personality-quiz");
-    }
+    navigate("/poker-personality-quiz");
   };
 
   const handleAuthAction = () => {
@@ -43,10 +36,6 @@ const Index = () => {
     } else {
       navigate("/auth");
     }
-  };
-  
-  const handleLeaderboard = () => {
-    navigate("/leaderboard");
   };
   
   if (isLoading) {
@@ -60,16 +49,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
-      {/* Leaderboard button */}
-      <Button 
-        onClick={handleLeaderboard}
-        variant="ghost" 
-        size="icon"
-        className="absolute top-4 right-4 text-poker-gold"
-      >
-        <Ribbon className="h-6 w-6" />
-      </Button>
-      
       <div className="text-center mb-8">
         <h1 className="text-poker-gold text-4xl md:text-5xl font-bold mb-2">
           poker gone wild
@@ -79,10 +58,8 @@ const Index = () => {
         </h2>
       </div>
       
-      <div className="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-poker-gold flex items-center justify-center mb-12 overflow-hidden">
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 text-white">
-          <span className="text-4xl font-bold">PGW</span>
-        </div>
+      <div className="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-poker-gold flex items-center justify-center mb-12">
+        <div className="text-poker-gold text-5xl font-bold italic">Logo</div>
       </div>
       
       <div className="flex flex-col gap-4 items-center">
