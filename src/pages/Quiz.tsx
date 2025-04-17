@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Heart, Clock } from "lucide-react";
 import PokerTable from "@/components/poker/PokerTable";
 import AnswerOptions from "@/components/poker/AnswerOptions";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useQuizData, extractUserPosition, Question, shuffleArray } from "@/utils/quizUtils";
 
 const Quiz = () => {
@@ -17,6 +20,12 @@ const Quiz = () => {
   const [userPosition, setUserPosition] = useState("BTN");
   const [visibleOpponents, setVisibleOpponents] = useState<number[]>([]);
   const navigate = useNavigate();
+  
+  // Competitive mode states
+  const [timeRemaining, setTimeRemaining] = useState(20);
+  const [lives, setLives] = useState(3);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [showGameOverDialog, setShowGameOverDialog] = useState(false);
 
   // Shuffle questions when they load
   useEffect(() => {
@@ -31,8 +40,44 @@ const Quiz = () => {
       const position = extractUserPosition(shuffledQuestions[currentQuestionIndex].question);
       setUserPosition(position);
       setVisibleOpponents([]); // Reset visible opponents for the new question
+      setTimeRemaining(20); // Reset timer for new question
     }
   }, [currentQuestionIndex, shuffledQuestions]);
+
+  // Timer countdown effect
+  useEffect(() => {
+    if (loading || isGameOver || selectedAnswer) return;
+    
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleTimeUp();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [currentQuestionIndex, loading, isGameOver, selectedAnswer]);
+
+  // Handle time running out
+  const handleTimeUp = () => {
+    const currentQuestion = shuffledQuestions[currentQuestionIndex];
+    setSelectedAnswer(currentQuestion.answer); // Show correct answer
+    setIsCorrect(false);
+    setLives(prev => prev - 1);
+    
+    setTimeout(() => {
+      if (lives <= 1) {
+        setIsGameOver(true);
+        setShowGameOverDialog(true);
+      } else {
+        moveToNextQuestion();
+      }
+    }, 1500);
+  };
 
   // Animate opponent actions appearance
   useEffect(() => {
@@ -59,6 +104,8 @@ const Quiz = () => {
   }, [currentQuestionIndex, shuffledQuestions]);
 
   const handleAnswerSelect = (answer: string) => {
+    if (isGameOver) return;
+    
     const currentQuestion = shuffledQuestions[currentQuestionIndex];
     
     setSelectedAnswer(answer);
@@ -67,20 +114,46 @@ const Quiz = () => {
     
     if (correct) {
       setScore(prevScore => prevScore + 1);
+    } else {
+      setLives(prev => prev - 1);
     }
     
     // Move to next question after delay
     setTimeout(() => {
-      if (currentQuestionIndex < shuffledQuestions.length - 1) {
-        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-        setSelectedAnswer(null);
-        setIsCorrect(null);
-        setVisibleOpponents([]); // Reset visible opponents for the new question
+      if (!correct && lives <= 1) {
+        setIsGameOver(true);
+        setShowGameOverDialog(true);
+      } else if (currentQuestionIndex < shuffledQuestions.length - 1) {
+        moveToNextQuestion();
       } else {
-        // Quiz completed - could navigate to a results page
-        console.log("Quiz completed!");
+        // Quiz completed
+        setIsGameOver(true);
+        setShowGameOverDialog(true);
       }
     }, 1500);
+  };
+  
+  const moveToNextQuestion = () => {
+    setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+    setSelectedAnswer(null);
+    setIsCorrect(null);
+    setVisibleOpponents([]); 
+    setTimeRemaining(20); // Reset timer
+  };
+  
+  const restartQuiz = () => {
+    // Reshuffle questions
+    setShuffledQuestions(shuffleArray([...originalQuestions]));
+    // Reset state
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setIsCorrect(null);
+    setScore(0);
+    setLives(3);
+    setVisibleOpponents([]);
+    setTimeRemaining(20);
+    setIsGameOver(false);
+    setShowGameOverDialog(false);
   };
 
   // Render the current question
@@ -94,6 +167,26 @@ const Quiz = () => {
     return (
       <div className="w-full h-full flex flex-col items-center">
         <h1 className="text-2xl font-bold text-amber-400 mb-2">Poker Quiz</h1>
+        
+        {/* Competitive mode UI - timer and lives */}
+        <div className="w-full max-w-lg mb-4 flex justify-between items-center">
+          <div className="flex items-center gap-1">
+            {[...Array(3)].map((_, i) => (
+              <Heart 
+                key={i} 
+                className={`h-6 w-6 ${i < lives ? 'text-red-500 fill-red-500' : 'text-gray-400'}`}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-amber-400" />
+            <div className="w-32">
+              <Progress value={(timeRemaining / 20) * 100} className="h-2">
+                <span className="absolute text-xs text-white right-1">{timeRemaining}s</span>
+              </Progress>
+            </div>
+          </div>
+        </div>
         
         {/* Poker table with cards and actions */}
         <PokerTable 
@@ -156,6 +249,44 @@ const Quiz = () => {
           renderCurrentQuestion()
         )}
       </div>
+      
+      {/* Game Over Dialog */}
+      <Dialog open={showGameOverDialog} onOpenChange={setShowGameOverDialog}>
+        <DialogContent className="bg-stone-800 border-amber-500">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl text-amber-400">
+              {isGameOver && currentQuestionIndex >= shuffledQuestions.length - 1 
+                ? "Quiz Complete!" 
+                : "Game Over!"}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 text-center">
+            <p className="text-xl mb-2">Final Score: {score}</p>
+            <p className="text-gray-300 mb-4">
+              {lives > 0 
+                ? "Congratulations! You completed the quiz." 
+                : "You've run out of lives!"}
+            </p>
+            <Button 
+              className="bg-amber-400 hover:bg-amber-500 text-black w-full"
+              onClick={restartQuiz}
+            >
+              Play Again
+            </Button>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => navigate('/')}
+            >
+              Back to Home
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
