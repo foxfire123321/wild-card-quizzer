@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -29,15 +28,28 @@ const PokerPersonalityQuiz = () => {
   const [error, setError] = useState<string | null>(null);
   const [checkingResults, setCheckingResults] = useState(false);
   const [resultCheckComplete, setResultCheckComplete] = useState(false);
+  const [forceNewQuiz, setForceNewQuiz] = useState(false);
   
-  // Check if user already has a result and redirect if needed, with improved error handling
   useEffect(() => {
-    // Only proceed when auth status is determined (either logged in or not)
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.has('restart')) {
+      setForceNewQuiz(true);
+      setResultCheckComplete(true);
+      
+      if (window.history.pushState) {
+        const newurl = window.location.protocol + "//" + 
+                     window.location.host + 
+                     window.location.pathname;
+        window.history.pushState({path: newurl}, '', newurl);
+      }
+    }
+  }, []);
+  
+  useEffect(() => {
     if (authLoading) return;
     
     const checkForExistingResult = async () => {
-      // Don't try to check for results if we're not logged in
-      if (!user) {
+      if (!user || forceNewQuiz) {
         setResultCheckComplete(true);
         return;
       }
@@ -46,12 +58,10 @@ const PokerPersonalityQuiz = () => {
         setCheckingResults(true);
         const savedResult = await getSavedPersonalityResult();
         
-        // If the user has a result, navigate to the results page
         if (savedResult && savedResult.length > 0) {
-          // Store the result for the result page to use
           localStorage.setItem('currentPersonalityResult', JSON.stringify({
             topPersonalities: savedResult,
-            personalities: {} // Empty placeholder since we don't need the full breakdown
+            personalities: {}
           }));
           
           navigate('/poker-personality-result');
@@ -59,22 +69,18 @@ const PokerPersonalityQuiz = () => {
         }
       } catch (error) {
         console.error("Error checking for saved result:", error);
-        // Don't show an error to the user, just let them take the quiz
       } finally {
         setCheckingResults(false);
         setResultCheckComplete(true);
       }
     };
     
-    // Only check once, and avoid rechecking
     if (!resultCheckComplete) {
       checkForExistingResult();
     }
-  }, [user, authLoading, resultCheckComplete, navigate]);
+  }, [user, authLoading, resultCheckComplete, navigate, forceNewQuiz]);
   
-  // Debounced answer selection to prevent double submissions
   const handleAnswerSelect = (answerId: string) => {
-    // Prevent multiple submissions
     if (isSubmitting || isTransitioning) return;
     
     setIsSubmitting(true);
@@ -106,7 +112,7 @@ const PokerPersonalityQuiz = () => {
         
         setIsTransitioning(false);
         setIsSubmitting(false);
-      }, 500); // Slightly longer transition for stability
+      }, 500);
     } catch (error) {
       console.error('Error in answer selection:', error);
       setError("Oops! Something went wrong. Please try again.");
@@ -118,7 +124,6 @@ const PokerPersonalityQuiz = () => {
   
   const handleQuizCompletion = async (result: PersonalityResult) => {
     try {
-      // Store result in localStorage for retrieval after login
       localStorage.setItem(
         'currentPersonalityResult', 
         JSON.stringify(result)
@@ -133,7 +138,6 @@ const PokerPersonalityQuiz = () => {
         } catch (error) {
           console.error('Failed to save result:', error);
           toast.error('Failed to save your result. Please try again.');
-          // Continue to result page even if saving fails
           navigate('/poker-personality-result');
         }
       }
@@ -144,7 +148,6 @@ const PokerPersonalityQuiz = () => {
     }
   };
   
-  // Show proper loading state
   if (authLoading || (checkingResults && !resultCheckComplete)) {
     return <LoadingSpinner message={checkingResults ? "Checking your saved results..." : "Loading..."} />;
   }
@@ -233,4 +236,3 @@ const PokerPersonalityQuiz = () => {
 };
 
 export default PokerPersonalityQuiz;
-
