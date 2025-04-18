@@ -1,8 +1,10 @@
+
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Award, Trophy } from "lucide-react";
+import LoginPrompt from "@/components/LoginPrompt";
 
 const Index = () => {
   const navigate = useNavigate();

@@ -148,6 +148,7 @@ const PokerCompanion = () => {
 
       {showLoginPrompt && (
         <LoginPrompt
+          title="Sign In Required"
           message="Please sign in to use the Poker Companion"
           returnPath="/poker-companion"
           onClose={() => navigate('/')}
