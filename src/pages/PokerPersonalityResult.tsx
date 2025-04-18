@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -7,7 +8,6 @@ import LoadingSpinner from "@/components/personality/LoadingSpinner";
 import PersonalityCard from "@/components/personality/PersonalityCard";
 import PersonalityNavButtons from "@/components/personality/PersonalityNavButtons";
 import ErrorBoundary from "@/components/personality/ErrorBoundary";
-import LoginPrompt from "@/components/LoginPrompt";
 
 interface PersonalityResultData {
   personalities: Record<PersonalityType, number>;
@@ -21,14 +21,14 @@ const PokerPersonalityResult = () => {
   const [result, setResult] = useState<PersonalityResultData | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   
   useEffect(() => {
     const loadResult = async () => {
       if (isLoading) return;
       
       if (!user) {
-        setShowLoginPrompt(true);
+        // If not logged in, redirect to login
+        navigate('/auth', { state: { returnPath: '/poker-personality-quiz' } });
         return;
       }
       
@@ -127,14 +127,6 @@ const PokerPersonalityResult = () => {
           <PersonalityNavButtons topPersonality={result.topPersonalities[0]} />
         </div>
       </div>
-      
-      {showLoginPrompt && (
-        <LoginPrompt
-          type="personality"
-          returnPath="/poker-personality-result"
-          onClose={() => setShowLoginPrompt(false)}
-        />
-      )}
     </ErrorBoundary>
   );
 };

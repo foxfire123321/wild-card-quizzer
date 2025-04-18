@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -29,11 +30,14 @@ const PokerPersonalityQuiz = () => {
   const [isCheckingResult, setIsCheckingResult] = useState(true);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   
+  // Check if the restart parameter is present
   const restartQuiz = searchParams.has('restart');
   
+  // Function to check for saved results and handle redirection
   const checkForSavedResult = useCallback(async () => {
     if (authLoading) return;
     
+    // If restart parameter is present, skip checking for saved results
     if (restartQuiz) {
       setIsCheckingResult(false);
       return;
@@ -44,6 +48,7 @@ const PokerPersonalityQuiz = () => {
         const savedResult = await getSavedPersonalityResult();
         
         if (savedResult && savedResult.length > 0) {
+          // Store the result in localStorage and redirect to results page
           localStorage.setItem('currentPersonalityResult', JSON.stringify({
             topPersonalities: savedResult,
             personalities: {}
@@ -71,17 +76,21 @@ const PokerPersonalityQuiz = () => {
     setError(null);
     
     try {
+      // Add the selected personality to the answers
       const newSelectedAnswers = [...selectedAnswers, personality];
       setSelectedAnswers(newSelectedAnswers);
       
       setIsTransitioning(true);
       
+      // Delay to allow for transition
       setTimeout(() => {
         if (currentQuestionIndex < quizQuestions.length - 1) {
+          // Move to the next question
           setCurrentQuestionIndex(prevIndex => prevIndex + 1);
           setIsTransitioning(false);
           setIsSubmitting(false);
         } else {
+          // Quiz complete, calculate result
           handleQuizCompletion(newSelectedAnswers);
         }
       }, 300);
@@ -96,13 +105,17 @@ const PokerPersonalityQuiz = () => {
   
   const handleQuizCompletion = async (answers: PersonalityType[]) => {
     try {
+      // Calculate the final result
       const result = calculatePersonalityResult(answers);
       
+      // Save to localStorage for the result page to access
       localStorage.setItem('currentPersonalityResult', JSON.stringify(result));
       
       if (!user) {
+        // If not logged in, prompt to login before showing results
         setShowLoginPrompt(true);
       } else {
+        // If logged in, save result and show the result page
         await savePersonalityResult(user.id, result.topPersonalities);
         navigate('/poker-personality-result');
       }
@@ -115,6 +128,7 @@ const PokerPersonalityQuiz = () => {
     }
   };
   
+  // Handle retry after error
   const handleRetry = () => {
     window.location.reload();
   };
@@ -205,7 +219,7 @@ const PokerPersonalityQuiz = () => {
       
       {showLoginPrompt && (
         <LoginPrompt
-          type="personality"
+          message="Log in to reveal your poker personality."
           returnPath="/poker-personality-result"
           onClose={() => setShowLoginPrompt(false)}
         />
