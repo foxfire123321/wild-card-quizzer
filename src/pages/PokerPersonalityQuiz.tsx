@@ -17,7 +17,7 @@ import {
 } from "@/utils/personalityQuizUtils";
 
 const PokerPersonalityQuiz = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -26,25 +26,45 @@ const PokerPersonalityQuiz = () => {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkingResults, setCheckingResults] = useState(false);
+  const [resultCheckComplete, setResultCheckComplete] = useState(false);
   
-  // Check if user already has a result and redirect if needed
+  // Check if user already has a result and redirect if needed, with improved error handling
   useEffect(() => {
-    if (!isLoading && user) {
-      const checkForExistingResult = async () => {
-        try {
-          const savedResult = await getSavedPersonalityResult();
-          if (savedResult && savedResult.length > 0) {
-            navigate('/poker-personality-result');
-          }
-        } catch (error) {
-          console.error("Error checking for saved result:", error);
-        }
-      };
+    // Only proceed when auth status is determined (either logged in or not)
+    if (authLoading) return;
+    
+    const checkForExistingResult = async () => {
+      // Don't try to check for results if we're not logged in
+      if (!user) {
+        setResultCheckComplete(true);
+        return;
+      }
       
+      try {
+        setCheckingResults(true);
+        const savedResult = await getSavedPersonalityResult();
+        
+        // If the user has a result, navigate to the results page
+        if (savedResult && savedResult.length > 0) {
+          navigate('/poker-personality-result');
+        }
+      } catch (error) {
+        console.error("Error checking for saved result:", error);
+        // Don't show an error to the user, just let them take the quiz
+      } finally {
+        setCheckingResults(false);
+        setResultCheckComplete(true);
+      }
+    };
+    
+    // Only check once, and avoid rechecking
+    if (!resultCheckComplete) {
       checkForExistingResult();
     }
-  }, [user, isLoading, navigate]);
+  }, [user, authLoading, resultCheckComplete, navigate]);
   
+  // Debounced answer selection to prevent double submissions
   const handleAnswerSelect = (answerId: string) => {
     // Prevent multiple submissions
     if (isSubmitting || isTransitioning) return;
@@ -114,11 +134,14 @@ const PokerPersonalityQuiz = () => {
     }
   };
   
-  if (isLoading) {
+  // Show proper loading state
+  if (authLoading || (checkingResults && !resultCheckComplete)) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
         <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full"></div>
-        <p className="mt-4 text-gray-600">Loading...</p>
+        <p className="mt-4 text-gray-600">
+          {checkingResults ? "Checking your saved results..." : "Loading..."}
+        </p>
       </div>
     );
   }
