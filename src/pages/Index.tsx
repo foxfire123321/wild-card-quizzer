@@ -1,14 +1,15 @@
-
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
 import { Award, Trophy } from "lucide-react";
+import { useState } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading } = useAuth();
-  
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
   const handleStartQuiz = () => {
     navigate("/quiz");
   };
@@ -18,16 +19,14 @@ const Index = () => {
   };
 
   const handlePokerCompanion = () => {
-    // If not logged in, show login prompt
     if (!user) {
-      navigate("/auth", { state: { returnPath: "/poker-companion" } });
+      setShowLoginPrompt(true);
       return;
     }
     navigate("/poker-companion");
   };
-  
+
   const handlePokerPersonalityQuiz = () => {
-    // Don't require login upfront, let preview mode handle it
     navigate("/poker-personality-quiz");
   };
 
@@ -58,7 +57,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
-      {/* Buttons container for Leaderboard and Achievements */}
       <div className="absolute top-4 right-4 flex gap-2">
         <Button
           onClick={handleAchievements}
@@ -76,7 +74,7 @@ const Index = () => {
         </Button>
       </div>
       
-      <div className="text-center mb-8 mt-[-10vh]"> {/* Added negative margin to move content up */}
+      <div className="text-center mb-8 mt-[-10vh]">
         <h1 className="text-amber-500 text-4xl md:text-5xl font-bold mb-2">
           poker gone wild
         </h1>
@@ -130,6 +128,14 @@ const Index = () => {
           {user ? 'Sign Out' : 'Sign In'}
         </Button>
       </div>
+
+      {showLoginPrompt && (
+        <LoginPrompt
+          type="poker-companion"
+          returnPath="/poker-companion"
+          onClose={() => setShowLoginPrompt(false)}
+        />
+      )}
     </div>
   );
 };

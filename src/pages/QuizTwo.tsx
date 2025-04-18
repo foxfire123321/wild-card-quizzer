@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import LoginPrompt from "@/components/LoginPrompt";
 import OnboardingOverlay, { TooltipInfo } from "@/components/onboarding/OnboardingOverlay";
+import { PersonalityType } from "@/utils/personalityQuizUtils";
 
 const QuizTwo = () => {
   const { questions: originalQuestions, loading, error } = useQuizData();
@@ -145,6 +145,23 @@ const QuizTwo = () => {
     }, 1500);
   };
 
+  const handleQuizCompletion = async (answers: PersonalityType[]) => {
+    try {
+      const result = calculatePersonalityResult(answers);
+      localStorage.setItem('currentPersonalityResult', JSON.stringify(result));
+      
+      if (!user) {
+        setShowLoginPrompt(true);
+      } else {
+        await savePersonalityResult(user.id, result.topPersonalities);
+        navigate('/poker-personality-result');
+      }
+    } catch (error) {
+      console.error('Error in quiz completion:', error);
+      toast.error("Error calculating your result. Please try again.");
+    }
+  };
+
   // Handle onboarding completion
   const handleOnboardingComplete = () => {
     // Nothing specific needed here for Quiz Two
@@ -247,7 +264,7 @@ const QuizTwo = () => {
       
       {showLoginPrompt && (
         <LoginPrompt
-          message="Your progress won't be saved unless you log in."
+          type="quiz-two"
           returnPath="/quiz-two"
           onClose={() => setShowLoginPrompt(false)}
         />

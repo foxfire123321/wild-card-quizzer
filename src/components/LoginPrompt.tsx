@@ -1,24 +1,45 @@
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
-import { recordLoginPrompt } from '@/utils/gameplayUtils';
+
+export type LoginPromptType = 'leaderboard' | 'quiz-two' | 'poker-companion' | 'personality';
+
+interface LoginPromptConfig {
+  title: string;
+  message: string;
+}
+
+const PROMPT_CONFIGS: Record<LoginPromptType, LoginPromptConfig> = {
+  'leaderboard': {
+    title: "Log in to Share Your Score!",
+    message: "Want to show off your poker skills? Log in to post your score to the global leaderboard.",
+  },
+  'quiz-two': {
+    title: "Save Your Progress",
+    message: "Sign up or log in to save your Quiz 2 results.",
+  },
+  'poker-companion': {
+    title: "Sign In Required",
+    message: "Log in to access the Poker Companion and track your sessions.",
+  },
+  'personality': {
+    title: "Discover Your Poker Personality",
+    message: "Log in to reveal your result.",
+  }
+};
 
 interface LoginPromptProps {
-  message: string;
+  type: LoginPromptType;
   returnPath: string;
   onClose: () => void;
 }
 
-const LoginPrompt = ({ message, returnPath, onClose }: LoginPromptProps) => {
+const LoginPrompt = ({ type, returnPath, onClose }: LoginPromptProps) => {
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Record that we prompted the user to login
-    recordLoginPrompt();
-  }, []);
+  const config = PROMPT_CONFIGS[type];
 
   const handleLogin = () => {
     // Store the return path so we can redirect back after login
@@ -38,12 +59,12 @@ const LoginPrompt = ({ message, returnPath, onClose }: LoginPromptProps) => {
       <DialogContent className="bg-stone-800 border-amber-500">
         <DialogHeader>
           <DialogTitle className="text-center text-xl text-amber-400">
-            Ready to save your progress?
+            {config.title}
           </DialogTitle>
         </DialogHeader>
         
         <DialogDescription className="text-center py-4 text-white">
-          {message}
+          {config.message}
         </DialogDescription>
         
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
@@ -59,7 +80,7 @@ const LoginPrompt = ({ message, returnPath, onClose }: LoginPromptProps) => {
             className="border-amber-400 text-amber-400 hover:bg-amber-100 hover:text-amber-600 w-full"
             onClick={handleClose}
           >
-            Continue Without Signing In
+            Cancel
           </Button>
         </DialogFooter>
       </DialogContent>
