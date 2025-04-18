@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -23,13 +22,10 @@ const PokerPersonalityQuiz = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<PersonalityType[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
   
   useEffect(() => {
     if (!isLoading) {
-      if (!user) {
-        setIsPreviewMode(true);
-      }
+      
     }
   }, [user, isLoading]);
   
@@ -37,17 +33,6 @@ const PokerPersonalityQuiz = () => {
     const currentQuestion = quizQuestions[currentQuestionIndex];
     const selectedAnswerIndex = parseInt(answerId);
     const personalityType = currentQuestion.answers[selectedAnswerIndex].personality;
-    
-    if (isPreviewMode && currentQuestionIndex === 0) {
-      setIsTransitioning(true);
-      
-      setTimeout(() => {
-        setShowLoginPrompt(true);
-        setIsTransitioning(false);
-      }, 300);
-      
-      return;
-    }
     
     const newSelectedAnswers = [...selectedAnswers, personalityType];
     setSelectedAnswers(newSelectedAnswers);
