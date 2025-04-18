@@ -148,7 +148,7 @@ const PokerCompanion = () => {
 
       {showLoginPrompt && (
         <LoginPrompt
-          type="poker-companion"
+          message="Please sign in to use the Poker Companion"
           returnPath="/poker-companion"
           onClose={() => navigate('/')}
         />
