@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Share2, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -17,8 +16,8 @@ const PersonalityNavButtons = ({ topPersonality }: PersonalityNavButtonsProps) =
     localStorage.removeItem('currentPersonalityResult');
     localStorage.removeItem('personalityQuizResult');
     
-    // Navigate to the quiz page
-    navigate('/poker-personality-quiz');
+    // Force a reload of the quiz page to ensure clean state
+    window.location.href = '/poker-personality-quiz';
   };
 
   const handleShare = () => {
