@@ -1,17 +1,18 @@
-
-import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { recordLoginPrompt } from '@/utils/gameplayUtils';
 
 interface LoginPromptProps {
+  title: string;
   message: string;
   returnPath: string;
   onClose: () => void;
+  showBackToMenu?: boolean;
 }
 
-const LoginPrompt = ({ message, returnPath, onClose }: LoginPromptProps) => {
+const LoginPrompt = ({ title, message, returnPath, onClose, showBackToMenu = false }: LoginPromptProps) => {
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();
 
@@ -33,12 +34,17 @@ const LoginPrompt = ({ message, returnPath, onClose }: LoginPromptProps) => {
     onClose();
   };
 
+  const handleBackToMenu = () => {
+    setOpen(false);
+    navigate('/');
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="bg-stone-800 border-amber-500">
         <DialogHeader>
           <DialogTitle className="text-center text-xl text-amber-400">
-            Ready to save your progress?
+            {title}
           </DialogTitle>
         </DialogHeader>
         
@@ -51,16 +57,26 @@ const LoginPrompt = ({ message, returnPath, onClose }: LoginPromptProps) => {
             className="bg-amber-400 hover:bg-amber-500 text-black w-full"
             onClick={handleLogin}
           >
-            Sign In / Register
+            Log In or Sign Up
           </Button>
           
-          <Button 
-            variant="outline" 
-            className="border-amber-400 text-amber-400 hover:bg-amber-100 hover:text-amber-600 w-full"
-            onClick={handleClose}
-          >
-            Continue Without Signing In
-          </Button>
+          {showBackToMenu ? (
+            <Button 
+              variant="outline" 
+              className="border-amber-400 text-amber-400 hover:bg-amber-100 hover:text-amber-600 w-full"
+              onClick={handleBackToMenu}
+            >
+              Back to Main Menu
+            </Button>
+          ) : (
+            <Button 
+              variant="outline" 
+              className="border-amber-400 text-amber-400 hover:bg-amber-100 hover:text-amber-600 w-full"
+              onClick={handleClose}
+            >
+              Cancel
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

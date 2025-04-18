@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -208,6 +207,14 @@ const QuizTwo = () => {
     );
   };
 
+  const handleQuizCompletion = async () => {
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    // Save quiz progress logic
+  };
+
   // Show loading when either auth is loading or progress is being loaded
   if (isLoading || !isProgressLoaded) {
     return (
@@ -247,7 +254,8 @@ const QuizTwo = () => {
       
       {showLoginPrompt && (
         <LoginPrompt
-          message="Your progress won't be saved unless you log in."
+          title="Save Your Progress"
+          message="Sign up or log in to save your Quiz 2 results."
           returnPath="/quiz-two"
           onClose={() => setShowLoginPrompt(false)}
         />

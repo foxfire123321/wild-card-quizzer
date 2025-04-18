@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -112,13 +111,12 @@ const PokerPersonalityQuiz = () => {
       localStorage.setItem('currentPersonalityResult', JSON.stringify(result));
       
       if (!user) {
-        // If not logged in, prompt to login before showing results
         setShowLoginPrompt(true);
-      } else {
-        // If logged in, save result and show the result page
-        await savePersonalityResult(user.id, result.topPersonalities);
-        navigate('/poker-personality-result');
+        return;
       }
+      // If logged in, save result and show the result page
+      await savePersonalityResult(user.id, result.topPersonalities);
+      navigate('/poker-personality-result');
     } catch (error) {
       console.error('Error in quiz completion:', error);
       setError("Something went wrong calculating your result. Please try again.");
@@ -219,9 +217,11 @@ const PokerPersonalityQuiz = () => {
       
       {showLoginPrompt && (
         <LoginPrompt
-          message="Log in to reveal your poker personality."
+          title="Discover Your Poker Personality"
+          message="Log in to reveal your result."
           returnPath="/poker-personality-result"
           onClose={() => setShowLoginPrompt(false)}
+          showBackToMenu={true}
         />
       )}
     </ErrorBoundary>
