@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import { 
   PersonalityType,
   personalityDescriptions,
-  personalityIcons
+  personalityIcons,
+  savePersonalityResult
 } from "@/utils/personalityQuizUtils";
 import { Share2 } from "lucide-react";
 

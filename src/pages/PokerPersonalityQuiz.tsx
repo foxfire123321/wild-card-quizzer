@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -8,6 +9,7 @@ import LoginPrompt from "@/components/LoginPrompt";
 import {
   QuizQuestion,
   PersonalityType,
+  PersonalityResult,
   quizQuestions,
   calculatePersonalityResult,
   savePersonalityResult
