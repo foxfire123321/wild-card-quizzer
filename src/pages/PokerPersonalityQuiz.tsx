@@ -29,8 +29,9 @@ const PokerPersonalityQuiz = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCheckingResult, setIsCheckingResult] = useState(true);
-  const [showLoginPrompt, checkAndShowPrompt, closePrompt, handleAuthAction] = 
-    useLoginPrompt('personality-quiz', '/poker-personality-result');
+  
+  const loginPrompt = useLoginPrompt('personality-quiz', '/poker-personality-result');
+  const { showLoginPrompt, checkAndShowPrompt, closePrompt, handleAuthAction } = loginPrompt;
   
   const restartQuiz = searchParams.has('restart');
   

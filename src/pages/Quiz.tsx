@@ -34,7 +34,6 @@ const Quiz = () => {
   const [lives, setLives] = useState(3);
   const [isGameOver, setIsGameOver] = useState(false);
   const [showGameOverDialog, setShowGameOverDialog] = useState(false);
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   
   const [showDamageFlash, setShowDamageFlash] = useState(false);
   const [lostLifeIndex, setLostLifeIndex] = useState<number | null>(null);
@@ -75,8 +74,8 @@ const Quiz = () => {
     }
   ];
 
-  const { showLoginPrompt, checkAndShowPrompt, closePrompt, handleAuthAction } = 
-    useLoginPrompt('quiz-one-leaderboard', '/quiz');
+  const loginPrompt = useLoginPrompt('quiz-one-leaderboard', '/quiz');
+  const { showLoginPrompt, checkAndShowPrompt, closePrompt, handleAuthAction } = loginPrompt;
 
   useEffect(() => {
     if (originalQuestions.length > 0) {
@@ -264,7 +263,7 @@ const Quiz = () => {
           }
         });
     } else if (shouldPromptLogin()) {
-      setShowLoginPrompt(true);
+      checkAndShowPrompt(true);
     }
   };
 
@@ -440,6 +439,21 @@ const Quiz = () => {
       </DialogContent>
     </Dialog>
   );
+
+  const handleShareScore = () => {
+    if (user) {
+      submitScoreToLeaderboard(user.id, 'quiz-one', score)
+        .then(wasHighScore => {
+          if (wasHighScore) {
+            toast.success("New high score submitted to leaderboard!");
+          } else {
+            toast.success("Score shared to leaderboard!");
+          }
+        });
+    } else {
+      checkAndShowPrompt(true);
+    }
+  };
 
   return (
     <>

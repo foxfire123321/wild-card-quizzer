@@ -22,8 +22,8 @@ const QuizTwo = () => {
   const [visibleOpponents, setVisibleOpponents] = useState<number[]>([]);
   const { user, isLoading } = useAuth();
   const [isProgressLoaded, setIsProgressLoaded] = useState(false);
-  const [showLoginPrompt, checkAndShowPrompt, closePrompt, handleAuthAction] = 
-    useLoginPrompt('quiz-two-progress', '/quiz-two');
+  const loginPrompt = useLoginPrompt('quiz-two-progress', '/quiz-two');
+  const { showLoginPrompt, checkAndShowPrompt, closePrompt, handleAuthAction } = loginPrompt;
 
   const quizTwoTooltips: TooltipInfo[] = [
     {
@@ -48,6 +48,8 @@ const QuizTwo = () => {
       arrowPosition: { top: "-30px", left: "20px", transform: "rotate(-90deg)" }
     }
   ];
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProgress = async () => {
