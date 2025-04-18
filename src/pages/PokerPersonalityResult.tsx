@@ -11,7 +11,7 @@ import {
   personalityIcons,
   savePersonalityResult
 } from "@/utils/personalityQuizUtils";
-import { Share2 } from "lucide-react";
+import { Share2, RotateCcw } from "lucide-react";
 
 interface PersonalityResultData {
   personalities: Record<PersonalityType, number>;
@@ -27,12 +27,24 @@ const PokerPersonalityResult = () => {
   
   useEffect(() => {
     const loadResult = async () => {
-      if (!isLoading && user) {
+      if (!isLoading) {
+        if (!user) {
+          // User not logged in, redirect to quiz
+          navigate('/poker-personality-quiz');
+          return;
+        }
+        
         // First try to get result from localStorage (from just completed quiz)
         const resultJson = localStorage.getItem('currentPersonalityResult');
         if (resultJson) {
           try {
             const parsedResult = JSON.parse(resultJson);
+            
+            // Limit to top 2 personalities if there are more than 2 tied
+            if (parsedResult.topPersonalities && parsedResult.topPersonalities.length > 2) {
+              parsedResult.topPersonalities = parsedResult.topPersonalities.slice(0, 2);
+            }
+            
             setResult(parsedResult);
             // Save the result if it was just completed
             await savePersonalityResult(user.id, parsedResult.topPersonalities);
@@ -144,7 +156,7 @@ const PokerPersonalityResult = () => {
               </div>
               
               <CardContent className="pt-6 pb-6">
-                {/* Placeholder image */}
+                {/* Personality icon */}
                 <div className="w-full h-48 bg-amber-100 rounded-lg mb-6 flex items-center justify-center">
                   <span className="text-6xl">{personalityIcons[personality]}</span>
                 </div>
@@ -157,37 +169,12 @@ const PokerPersonalityResult = () => {
           ))}
         </div>
         
-        {/* Score breakdown */}
-        <Card className="mb-8">
-          <CardContent className="pt-6">
-            <h3 className="font-bold text-lg mb-4 text-gray-800">Your Personality Breakdown</h3>
-            
-            <div className="space-y-3">
-              {Object.entries(result.personalities).map(([personality, score]) => (
-                <div key={personality} className="flex items-center">
-                  <span className="font-medium text-gray-700 w-28">
-                    {personalityIcons[personality as PersonalityType]} {personality}
-                  </span>
-                  <div className="flex-1 mx-2">
-                    <div className="w-full bg-amber-100 rounded-full h-2.5">
-                      <div 
-                        className="bg-poker-gold h-2.5 rounded-full"
-                        style={{ width: `${(score / 7) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  <span className="text-gray-600 min-w-[30px] text-right">{score}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <Button 
             onClick={handleTakeAgain}
             className="bg-poker-gold hover:bg-amber-600 text-white"
           >
+            <RotateCcw className="mr-2 h-4 w-4" />
             Take it Again
           </Button>
           

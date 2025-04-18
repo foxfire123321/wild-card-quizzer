@@ -118,33 +118,43 @@ export const personalityIcons: Record<PersonalityType, string> = {
 
 // Calculate the personality result based on the answers
 export const calculatePersonalityResult = (selectedAnswers: PersonalityType[]): PersonalityResult => {
-  // Count the occurrences of each personality type
-  const personalities: Record<PersonalityType, number> = {
-    "Shark": 0,
-    "Gambler": 0,
-    "Rock": 0,
-    "Chat Pro": 0,
-    "Wizard": 0,
-    "Wildcard": 0
-  };
-  
-  // Increment the count for each selected personality
-  selectedAnswers.forEach(personality => {
-    personalities[personality]++;
-  });
-  
-  // Find the maximum score
-  const maxScore = Math.max(...Object.values(personalities));
-  
-  // Find all personalities with the maximum score (in case of ties)
-  const topPersonalities = Object.entries(personalities)
-    .filter(([_, score]) => score === maxScore)
-    .map(([personality]) => personality as PersonalityType);
-  
-  return {
-    personalities,
-    topPersonalities
-  };
+  try {
+    // Count the occurrences of each personality type
+    const personalities: Record<PersonalityType, number> = {
+      "Shark": 0,
+      "Gambler": 0,
+      "Rock": 0,
+      "Chat Pro": 0,
+      "Wizard": 0,
+      "Wildcard": 0
+    };
+    
+    // Increment the count for each selected personality
+    selectedAnswers.forEach(personality => {
+      personalities[personality]++;
+    });
+    
+    // Find the maximum score
+    const maxScore = Math.max(...Object.values(personalities));
+    
+    // Find all personalities with the maximum score (in case of ties)
+    const topPersonalities = Object.entries(personalities)
+      .filter(([_, score]) => score === maxScore)
+      .map(([personality]) => personality as PersonalityType);
+    
+    // Limit to top 2 personalities if there are more than 2 tied
+    const limitedTopPersonalities = topPersonalities.length > 2 
+      ? topPersonalities.slice(0, 2) 
+      : topPersonalities;
+    
+    return {
+      personalities,
+      topPersonalities: limitedTopPersonalities
+    };
+  } catch (error) {
+    console.error("Error calculating personality result:", error);
+    throw new Error("Failed to calculate personality result");
+  }
 };
 
 // Save personality quiz result to Supabase
@@ -163,7 +173,6 @@ export const savePersonalityResult = async (
         quiz_id: 'personality',
         last_question_index: quizQuestions.length, // Completed all questions
         score: 0, // Not applicable for personality quiz, but required by the schema
-        // Store the personality result in the metadata field as a stringified JSON
         updated_at: new Date().toISOString()
       }, {
         onConflict: 'user_id,quiz_id'
@@ -206,8 +215,8 @@ export const getSavedPersonalityResult = async (): Promise<PersonalityType[] | n
       .single();
     
     if (data) {
-      // For simplicity, we'll return null if there's no saved result
-      // In a real app, you might want to return the actual saved result
+      // For now, we're returning null since we don't store the actual personality types in the DB
+      // In a future enhancement, we could store this data in the metadata field
       return null;
     }
     
