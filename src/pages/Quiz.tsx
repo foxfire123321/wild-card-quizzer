@@ -15,6 +15,8 @@ import LoginPrompt from "@/components/LoginPrompt";
 import { submitScoreToLeaderboard } from "@/utils/leaderboardUtils";
 import { toast } from "sonner";
 import OnboardingOverlay, { TooltipInfo } from "@/components/onboarding/OnboardingOverlay";
+import GameLoginPrompt from "@/components/auth/GameLoginPrompt";
+import { useLoginPrompt } from "@/hooks/useLoginPrompt";
 
 const Quiz = () => {
   const { questions: originalQuestions, loading, error } = useQuizData();
@@ -72,6 +74,9 @@ const Quiz = () => {
       arrowPosition: { top: "-30px", right: "20px", transform: "rotate(90deg)" }
     }
   ];
+
+  const { showLoginPrompt, checkAndShowPrompt, closePrompt, handleAuthAction } = 
+    useLoginPrompt('quiz-one-leaderboard', '/quiz');
 
   useEffect(() => {
     if (originalQuestions.length > 0) {
@@ -254,6 +259,8 @@ const Quiz = () => {
         .then(wasHighScore => {
           if (wasHighScore) {
             toast.success("New high score submitted to leaderboard!");
+          } else {
+            toast.success("Score shared to leaderboard!");
           }
         });
     } else if (shouldPromptLogin()) {
@@ -387,6 +394,53 @@ const Quiz = () => {
     );
   };
 
+  const renderGameOverDialog = () => (
+    <Dialog open={showGameOverDialog} onOpenChange={setShowGameOverDialog}>
+      <DialogContent className="bg-stone-800 border-amber-500">
+        <DialogHeader>
+          <DialogTitle className="text-center text-2xl text-amber-400">
+            {isGameOver && currentQuestionIndex >= shuffledQuestions.length - 1 
+              ? "Quiz Complete!" 
+              : "Game Over!"}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="py-4 text-center">
+          <p className="text-xl mb-2">Final Score: {score}</p>
+          <p className="text-gray-300 mb-4">
+            {lives > 0 
+              ? "Congratulations! You completed the quiz." 
+              : "You've run out of lives!"}
+          </p>
+          <div className="space-y-2">
+            <Button 
+              className="bg-amber-400 hover:bg-amber-500 text-black w-full"
+              onClick={handleShareScore}
+            >
+              Share Your Score
+            </Button>
+            <Button 
+              className="bg-amber-400 hover:bg-amber-500 text-black w-full"
+              onClick={restartQuiz}
+            >
+              Play Again
+            </Button>
+          </div>
+        </div>
+        
+        <DialogFooter>
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => navigate('/')}
+          >
+            Back to Home
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
   return (
     <>
       <div className="min-h-screen quiz-theme p-4 md:p-8">
@@ -429,51 +483,16 @@ const Quiz = () => {
           ) : renderCurrentQuestion()}
         </div>
         
-        <Dialog open={showGameOverDialog} onOpenChange={setShowGameOverDialog}>
-          <DialogContent className="bg-stone-800 border-amber-500">
-            <DialogHeader>
-              <DialogTitle className="text-center text-2xl text-amber-400">
-                {isGameOver && currentQuestionIndex >= shuffledQuestions.length - 1 
-                  ? "Quiz Complete!" 
-                  : "Game Over!"}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="py-4 text-center">
-              <p className="text-xl mb-2">Final Score: {score}</p>
-              <p className="text-gray-300 mb-4">
-                {lives > 0 
-                  ? "Congratulations! You completed the quiz." 
-                  : "You've run out of lives!"}
-              </p>
-              <Button 
-                className="bg-amber-400 hover:bg-amber-500 text-black w-full"
-                onClick={restartQuiz}
-              >
-                Play Again
-              </Button>
-            </div>
-            
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate('/')}
-              >
-                Back to Home
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {renderGameOverDialog()}
       </div>
 
-      {showLoginPrompt && (
-        <LoginPrompt
-          message="Sign in to save your progress and appear on the leaderboard!"
-          returnPath="/quiz"
-          onClose={() => setShowLoginPrompt(false)}
-        />
-      )}
+      <GameLoginPrompt
+        type="quiz-one-leaderboard"
+        open={showLoginPrompt}
+        onClose={closePrompt}
+        onLogin={handleAuthAction}
+        returnPath="/quiz"
+      />
     </>
   );
 };
