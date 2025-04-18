@@ -25,31 +25,34 @@ const PokerPersonalityResult = () => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        toast.error("Please log in to view your result");
-        navigate("/auth");
-        return;
-      }
-      
-      // Load result from localStorage
-      const resultJson = localStorage.getItem('currentPersonalityResult');
-      if (resultJson) {
-        try {
-          const parsedResult = JSON.parse(resultJson);
-          setResult(parsedResult);
-        } catch (e) {
-          console.error("Failed to parse result:", e);
-          toast.error("Could not load your result");
+    const loadResult = async () => {
+      if (!isLoading && user) {
+        // First try to get result from localStorage (from just completed quiz)
+        const resultJson = localStorage.getItem('currentPersonalityResult');
+        if (resultJson) {
+          try {
+            const parsedResult = JSON.parse(resultJson);
+            setResult(parsedResult);
+            // Save the result if it was just completed
+            await savePersonalityResult(user.id, parsedResult.topPersonalities);
+            // Clear from localStorage after saving
+            localStorage.removeItem('currentPersonalityResult');
+          } catch (e) {
+            console.error("Failed to parse result:", e);
+            toast.error("Could not load your result");
+            navigate('/poker-personality-quiz');
+          }
+        } else {
+          // If no result in localStorage, the user might be accessing directly
+          // In this case, redirect them to take the quiz
+          toast.error("No quiz result found");
           navigate('/poker-personality-quiz');
         }
-      } else {
-        toast.error("No quiz result found");
-        navigate('/poker-personality-quiz');
+        setLoading(false);
       }
-      
-      setLoading(false);
-    }
+    };
+    
+    loadResult();
   }, [isLoading, user, navigate]);
   
   const handleTakeAgain = () => {

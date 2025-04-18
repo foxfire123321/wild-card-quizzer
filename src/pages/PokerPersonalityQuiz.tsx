@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -24,7 +23,6 @@ const PokerPersonalityQuiz = () => {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   
-  // Check if user is logged in and set preview mode accordingly
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
@@ -34,14 +32,11 @@ const PokerPersonalityQuiz = () => {
   }, [user, isLoading]);
   
   const handleAnswerSelect = (answerId: string) => {
-    // Get the personality type associated with the selected answer
     const currentQuestion = quizQuestions[currentQuestionIndex];
     const selectedAnswerIndex = parseInt(answerId);
     const personalityType = currentQuestion.answers[selectedAnswerIndex].personality;
     
-    // If in preview mode and this is the first question, show login prompt
     if (isPreviewMode && currentQuestionIndex === 0) {
-      // Add visual transition first
       setIsTransitioning(true);
       
       setTimeout(() => {
@@ -52,45 +47,40 @@ const PokerPersonalityQuiz = () => {
       return;
     }
     
-    // Add the personality type to the selected answers
     const newSelectedAnswers = [...selectedAnswers, personalityType];
     setSelectedAnswers(newSelectedAnswers);
     
-    // Start transition animation
     setIsTransitioning(true);
     
-    // Delay to allow for transition animation
     setTimeout(() => {
       if (currentQuestionIndex < quizQuestions.length - 1) {
-        // Move to the next question
         setCurrentQuestionIndex(prevIndex => prevIndex + 1);
       } else {
-        // Quiz completed, calculate result
         const result = calculatePersonalityResult(newSelectedAnswers);
-        
-        // Save the result to Supabase
-        if (user) {
-          savePersonalityResult(user.id, result.topPersonalities)
-            .then(() => {
-              // Store the result in localStorage for the result page
-              localStorage.setItem(
-                'currentPersonalityResult', 
-                JSON.stringify(result)
-              );
-              
-              // Navigate to the result page
-              navigate('/poker-personality-result');
-            })
-            .catch(error => {
-              console.error('Failed to save result:', error);
-              toast.error('Failed to save your result. Please try again.');
-            });
-        }
+        handleQuizCompletion(result);
       }
       
-      // End transition animation
       setIsTransitioning(false);
     }, 300);
+  };
+  
+  const handleQuizCompletion = async (result: PersonalityResult) => {
+    localStorage.setItem(
+      'currentPersonalityResult', 
+      JSON.stringify(result)
+    );
+    
+    if (!user) {
+      setShowLoginPrompt(true);
+    } else {
+      try {
+        await savePersonalityResult(user.id, result.topPersonalities);
+        navigate('/poker-personality-result');
+      } catch (error) {
+        console.error('Failed to save result:', error);
+        toast.error('Failed to save your result. Please try again.');
+      }
+    }
   };
   
   if (isLoading) {
@@ -113,7 +103,6 @@ const PokerPersonalityQuiz = () => {
               Poker Personality Quiz
             </h1>
             
-            {/* Progress bar */}
             <div className="w-full bg-amber-100 rounded-full h-2.5 mb-4 mt-6">
               <div 
                 className="bg-poker-gold h-2.5 rounded-full transition-all duration-300" 
@@ -132,7 +121,6 @@ const PokerPersonalityQuiz = () => {
                 {currentQuestion.question}
               </h2>
               
-              {/* Button-style answer options that submit immediately on click */}
               <div className="space-y-3">
                 {currentQuestion.answers.map((answer, index) => (
                   <Button
@@ -162,9 +150,9 @@ const PokerPersonalityQuiz = () => {
       
       {showLoginPrompt && (
         <LoginPrompt
-          message="Log in to unlock your poker personality."
-          returnPath="/poker-personality-quiz"
-          onClose={() => navigate('/')}
+          message="Log in to reveal your poker personality."
+          returnPath="/poker-personality-result"
+          onClose={() => setShowLoginPrompt(false)}
         />
       )}
     </>
