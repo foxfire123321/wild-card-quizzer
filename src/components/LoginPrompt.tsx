@@ -34,9 +34,10 @@ interface LoginPromptProps {
   type: LoginPromptType;
   returnPath: string;
   onClose: () => void;
+  message?: string; // Optional custom message that overrides the default
 }
 
-const LoginPrompt = ({ type, returnPath, onClose }: LoginPromptProps) => {
+const LoginPrompt = ({ type, returnPath, onClose, message }: LoginPromptProps) => {
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();
   const config = PROMPT_CONFIGS[type];
@@ -64,7 +65,7 @@ const LoginPrompt = ({ type, returnPath, onClose }: LoginPromptProps) => {
         </DialogHeader>
         
         <DialogDescription className="text-center py-4 text-white">
-          {config.message}
+          {message || config.message}
         </DialogDescription>
         
         <DialogFooter className="flex flex-col sm:flex-row gap-2">

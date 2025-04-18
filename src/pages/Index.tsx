@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
 import { Award, Trophy } from "lucide-react";
 import { useState } from "react";
+import LoginPrompt from "@/components/LoginPrompt";
 
 const Index = () => {
   const navigate = useNavigate();
