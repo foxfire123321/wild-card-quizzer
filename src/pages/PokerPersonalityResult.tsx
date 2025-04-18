@@ -7,6 +7,7 @@ import { PersonalityType, savePersonalityResult } from "@/utils/personalityQuizU
 import LoadingSpinner from "@/components/personality/LoadingSpinner";
 import PersonalityCard from "@/components/personality/PersonalityCard";
 import PersonalityNavButtons from "@/components/personality/PersonalityNavButtons";
+import ErrorBoundary from "@/components/personality/ErrorBoundary";
 
 interface PersonalityResultData {
   personalities: Record<PersonalityType, number>;
@@ -23,60 +24,58 @@ const PokerPersonalityResult = () => {
   
   useEffect(() => {
     const loadResult = async () => {
-      if (!isLoading) {
-        if (!user) {
-          navigate('/poker-personality-quiz');
-          return;
-        }
+      if (isLoading) return;
+      
+      if (!user) {
+        // If not logged in, redirect to login
+        navigate('/auth', { state: { returnPath: '/poker-personality-quiz' } });
+        return;
+      }
+      
+      try {
+        // Get result from localStorage (from completed quiz or previous fetch)
+        const resultJson = localStorage.getItem('currentPersonalityResult');
         
-        try {
-          // First try to get the result from localStorage (from completed quiz or previous fetch)
-          const resultJson = localStorage.getItem('currentPersonalityResult');
-          
-          if (resultJson) {
-            try {
-              const parsedResult = JSON.parse(resultJson);
-              
-              if (parsedResult.topPersonalities && parsedResult.topPersonalities.length > 0) {
-                // Ensure we only show at most 2 personalities
-                if (parsedResult.topPersonalities.length > 2) {
-                  parsedResult.topPersonalities = parsedResult.topPersonalities.slice(0, 2);
-                }
-                
-                setResult(parsedResult);
-                
-                // Save the result to the user's account if it's a fresh result
-                if (user.id) {
-                  try {
-                    await savePersonalityResult(user.id, parsedResult.topPersonalities);
-                    // Only remove from localStorage if successfully saved to database
-                    localStorage.removeItem('currentPersonalityResult');
-                  } catch (e) {
-                    console.error("Failed to save result to account:", e);
-                    // Don't remove from localStorage if save fails, so we can try again
-                  }
-                }
-              } else {
-                throw new Error("Invalid personality result format");
+        if (resultJson) {
+          try {
+            const parsedResult = JSON.parse(resultJson);
+            
+            if (parsedResult.topPersonalities && parsedResult.topPersonalities.length > 0) {
+              // Ensure we only show at most 2 personalities
+              if (parsedResult.topPersonalities.length > 2) {
+                parsedResult.topPersonalities = parsedResult.topPersonalities.slice(0, 2);
               }
-            } catch (e) {
-              console.error("Failed to parse result:", e);
-              setErrorMessage("Could not load your result. Please try again.");
-              toast.error("Could not load your result");
-              setTimeout(() => navigate('/poker-personality-quiz'), 2000);
+              
+              setResult(parsedResult);
+              
+              // Save the result to the user's account if it's a fresh result
+              if (user.id) {
+                try {
+                  await savePersonalityResult(user.id, parsedResult.topPersonalities);
+                } catch (e) {
+                  console.error("Failed to save result to account:", e);
+                }
+              }
+            } else {
+              throw new Error("Invalid personality result format");
             }
-          } else {
-            // If no result in localStorage, redirect to quiz
-            setErrorMessage("No quiz result found. Starting quiz...");
-            toast.error("No quiz result found");
+          } catch (e) {
+            console.error("Failed to parse result:", e);
+            setErrorMessage("Could not load your result. Please try again.");
+            toast.error("Could not load your result");
             setTimeout(() => navigate('/poker-personality-quiz'), 2000);
           }
-        } catch (error) {
-          console.error("Error in loadResult:", error);
-          setErrorMessage("Something went wrong. Please try again.");
-        } finally {
-          setLoading(false);
+        } else {
+          // If no result in localStorage, redirect to quiz
+          setErrorMessage("No quiz result found. Starting quiz...");
+          toast.error("No quiz result found");
+          setTimeout(() => navigate('/poker-personality-quiz'), 2000);
         }
+      } catch (error) {
+        console.error("Error in loadResult:", error);
+        setErrorMessage("Something went wrong. Please try again.");
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -104,29 +103,31 @@ const PokerPersonalityResult = () => {
   }
   
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8 bg-gradient-to-b from-amber-50 to-amber-100">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-poker-gold text-3xl md:text-4xl font-bold mb-2">
-            Your Poker Personality
-          </h1>
+    <ErrorBoundary>
+      <div className="min-h-screen flex flex-col items-center px-4 py-8 bg-gradient-to-b from-amber-50 to-amber-100">
+        <div className="w-full max-w-2xl">
+          <div className="text-center mb-8">
+            <h1 className="text-poker-gold text-3xl md:text-4xl font-bold mb-2">
+              Your Poker Personality
+            </h1>
+            
+            {result.topPersonalities.length > 1 ? (
+              <p className="text-gray-600 text-lg">
+                It's a tie! You have multiple personality traits
+              </p>
+            ) : null}
+          </div>
           
-          {result.topPersonalities.length > 1 ? (
-            <p className="text-gray-600 text-lg">
-              It's a tie! You have multiple personality traits
-            </p>
-          ) : null}
+          <div className="space-y-8 mb-8">
+            {result.topPersonalities.map((personality) => (
+              <PersonalityCard key={personality} personality={personality} />
+            ))}
+          </div>
+          
+          <PersonalityNavButtons topPersonality={result.topPersonalities[0]} />
         </div>
-        
-        <div className="space-y-8 mb-8">
-          {result.topPersonalities.map((personality) => (
-            <PersonalityCard key={personality} personality={personality} />
-          ))}
-        </div>
-        
-        <PersonalityNavButtons topPersonality={result.topPersonalities[0]} />
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 

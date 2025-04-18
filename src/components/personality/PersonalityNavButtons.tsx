@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Share2, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -13,34 +14,32 @@ const PersonalityNavButtons = ({ topPersonality }: PersonalityNavButtonsProps) =
 
   const handleTakeAgain = async () => {
     try {
-      // Clear any stored personality result from localStorage
+      // First, clear any stored personality result from localStorage
       localStorage.removeItem('currentPersonalityResult');
       localStorage.removeItem('personalityQuizResult');
       
       // If the user is logged in, attempt to clear from database as well
-      if (window.location.pathname.includes('result')) {
-        const { supabase } = await import('@/integrations/supabase/client');
-        const { data: user } = await supabase.auth.getUser();
-        
-        if (user && user.user) {
-          // Mark the personality quiz as not taken in the quiz_progress table
-          await supabase
-            .from('quiz_progress')
-            .update({
-              score: 0,
-              last_question_index: 0
-            })
-            .eq('user_id', user.user.id)
-            .eq('quiz_id', 'personality');
-        }
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Mark the personality quiz as not taken in the quiz_progress table
+        await supabase
+          .from('quiz_progress')
+          .update({
+            score: 0,
+            last_question_index: 0
+          })
+          .eq('user_id', user.id)
+          .eq('quiz_id', 'personality');
       }
       
-      // Redirect to quiz with restart parameter to force a new quiz
-      window.location.href = '/poker-personality-quiz?restart=true';
+      // Redirect to quiz with restart parameter
+      navigate('/poker-personality-quiz?restart=true');
     } catch (error) {
       console.error("Error in handleTakeAgain:", error);
       // Even if there's an error clearing from database, still try to restart
-      window.location.href = '/poker-personality-quiz?restart=true';
+      navigate('/poker-personality-quiz?restart=true');
     }
   };
 

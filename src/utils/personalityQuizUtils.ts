@@ -1,4 +1,3 @@
-
 // Types
 export type PersonalityType = 
   | "Shark" 
@@ -116,7 +115,7 @@ export const personalityIcons: Record<PersonalityType, string> = {
   "Wildcard": "🃏"
 };
 
-// Calculate the personality result based on the answers
+// Calculate the personality result
 export const calculatePersonalityResult = (selectedAnswers: PersonalityType[]): PersonalityResult => {
   try {
     // Count the occurrences of each personality type
@@ -165,31 +164,20 @@ export const savePersonalityResult = async (
   try {
     const { supabase } = await import('@/integrations/supabase/client');
     
-    // Store the result in the quiz_progress table using the special quiz_id "personality"
+    // Store the result in the quiz_progress table
     await supabase
       .from('quiz_progress')
       .upsert({
         user_id: userId,
         quiz_id: 'personality',
-        last_question_index: quizQuestions.length, // Completed all questions
-        score: 0, // Not applicable for personality quiz, but required by the schema
+        last_question_index: -1, // Special marker to indicate completed quiz
+        score: 1, // Use score of 1 to indicate a completed result
         updated_at: new Date().toISOString()
       }, {
         onConflict: 'user_id,quiz_id'
       });
-      
-    // Also store the personality types in metadata
-    await supabase
-      .from('quiz_progress')
-      .update({
-        // Store the personality types as a comma-separated string in the metadata
-        score: topPersonalities.length > 0 ? 1 : 0, // Use score to indicate if there's a result (1) or not (0)
-        last_question_index: -1 // Special marker to indicate this is a complete personality result
-      })
-      .eq('user_id', userId)
-      .eq('quiz_id', 'personality');
     
-    // We'll also store the full result in localStorage for the current session
+    // Store the result in localStorage for the current session as well
     localStorage.setItem('personalityQuizResult', JSON.stringify({
       topPersonalities,
       timestamp: new Date().toISOString()
@@ -204,9 +192,9 @@ export const savePersonalityResult = async (
 export const getSavedPersonalityResult = async (): Promise<PersonalityType[] | null> => {
   try {
     const { supabase } = await import('@/integrations/supabase/client');
-    const { data: user } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (!user.user) {
+    if (!user) {
       return null;
     }
     
@@ -228,7 +216,7 @@ export const getSavedPersonalityResult = async (): Promise<PersonalityType[] | n
     const { data, error } = await supabase
       .from('quiz_progress')
       .select('*')
-      .eq('user_id', user.user.id)
+      .eq('user_id', user.id)
       .eq('quiz_id', 'personality')
       .maybeSingle();
     
@@ -238,9 +226,10 @@ export const getSavedPersonalityResult = async (): Promise<PersonalityType[] | n
     }
     
     if (data && data.score === 1 && data.last_question_index === -1) {
-      // Use a default personality if we can't get the actual result
-      // This should never happen with the updated storage approach, but it's a fallback
-      return ["Shark"];
+      // In our updated implementation, we don't store the actual personality types
+      // in the database. If we detect a completed quiz, we return null 
+      // to trigger a new quiz since we can't recover the specific personalities.
+      return null;
     }
     
     return null;
@@ -249,4 +238,3 @@ export const getSavedPersonalityResult = async (): Promise<PersonalityType[] | n
     return null;
   }
 };
-
