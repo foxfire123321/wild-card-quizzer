@@ -12,6 +12,15 @@ interface PersonalityNavButtonsProps {
 const PersonalityNavButtons = ({ topPersonality }: PersonalityNavButtonsProps) => {
   const navigate = useNavigate();
 
+  const handleTakeAgain = () => {
+    // Clear any stored personality result from localStorage
+    localStorage.removeItem('currentPersonalityResult');
+    localStorage.removeItem('personalityQuizResult');
+    
+    // Navigate to the quiz page
+    navigate('/poker-personality-quiz');
+  };
+
   const handleShare = () => {
     if (!topPersonality) return;
     
@@ -43,7 +52,7 @@ const PersonalityNavButtons = ({ topPersonality }: PersonalityNavButtonsProps) =
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-4">
       <Button 
-        onClick={() => navigate('/poker-personality-quiz')}
+        onClick={handleTakeAgain}
         className="bg-poker-gold hover:bg-amber-600 text-white"
       >
         <RotateCcw className="mr-2 h-4 w-4" />
