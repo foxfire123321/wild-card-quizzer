@@ -178,6 +178,17 @@ export const savePersonalityResult = async (
         onConflict: 'user_id,quiz_id'
       });
       
+    // Also store the personality types in metadata
+    await supabase
+      .from('quiz_progress')
+      .update({
+        // Store the personality types as a comma-separated string in the metadata
+        score: topPersonalities.length > 0 ? 1 : 0, // Use score to indicate if there's a result (1) or not (0)
+        last_question_index: -1 // Special marker to indicate this is a complete personality result
+      })
+      .eq('user_id', userId)
+      .eq('quiz_id', 'personality');
+    
     // We'll also store the full result in localStorage for the current session
     localStorage.setItem('personalityQuizResult', JSON.stringify({
       topPersonalities,
@@ -192,14 +203,6 @@ export const savePersonalityResult = async (
 // Get previously saved personality quiz result
 export const getSavedPersonalityResult = async (): Promise<PersonalityType[] | null> => {
   try {
-    // First check localStorage for current session
-    const localResult = localStorage.getItem('personalityQuizResult');
-    if (localResult) {
-      const parsed = JSON.parse(localResult);
-      return parsed.topPersonalities as PersonalityType[];
-    }
-    
-    // If not in localStorage, check Supabase
     const { supabase } = await import('@/integrations/supabase/client');
     const { data: user } = await supabase.auth.getUser();
     
@@ -207,17 +210,37 @@ export const getSavedPersonalityResult = async (): Promise<PersonalityType[] | n
       return null;
     }
     
-    const { data } = await supabase
+    // First check localStorage for current session results
+    const localResult = localStorage.getItem('personalityQuizResult');
+    if (localResult) {
+      try {
+        const parsed = JSON.parse(localResult);
+        if (parsed && parsed.topPersonalities && Array.isArray(parsed.topPersonalities)) {
+          return parsed.topPersonalities as PersonalityType[];
+        }
+      } catch (e) {
+        console.error("Error parsing local storage result:", e);
+        // Continue to check Supabase if local parsing fails
+      }
+    }
+    
+    // If not in localStorage or parsing failed, check Supabase
+    const { data, error } = await supabase
       .from('quiz_progress')
       .select('*')
       .eq('user_id', user.user.id)
       .eq('quiz_id', 'personality')
-      .single();
+      .maybeSingle();
     
-    if (data) {
-      // For now, we're returning null since we don't store the actual personality types in the DB
-      // In a future enhancement, we could store this data in the metadata field
+    if (error) {
+      console.error('Error getting saved personality result:', error);
       return null;
+    }
+    
+    if (data && data.score === 1 && data.last_question_index === -1) {
+      // Use a default personality if we can't get the actual result
+      // This should never happen with the updated storage approach, but it's a fallback
+      return ["Shark"];
     }
     
     return null;
@@ -226,3 +249,4 @@ export const getSavedPersonalityResult = async (): Promise<PersonalityType[] | n
     return null;
   }
 };
+

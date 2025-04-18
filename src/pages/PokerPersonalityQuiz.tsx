@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import LoginPrompt from "@/components/LoginPrompt";
+import LoadingSpinner from "@/components/personality/LoadingSpinner";
 import {
   QuizQuestion,
   PersonalityType,
@@ -47,7 +48,14 @@ const PokerPersonalityQuiz = () => {
         
         // If the user has a result, navigate to the results page
         if (savedResult && savedResult.length > 0) {
+          // Store the result for the result page to use
+          localStorage.setItem('currentPersonalityResult', JSON.stringify({
+            topPersonalities: savedResult,
+            personalities: {} // Empty placeholder since we don't need the full breakdown
+          }));
+          
           navigate('/poker-personality-result');
+          return;
         }
       } catch (error) {
         console.error("Error checking for saved result:", error);
@@ -125,6 +133,8 @@ const PokerPersonalityQuiz = () => {
         } catch (error) {
           console.error('Failed to save result:', error);
           toast.error('Failed to save your result. Please try again.');
+          // Continue to result page even if saving fails
+          navigate('/poker-personality-result');
         }
       }
     } catch (error) {
@@ -136,14 +146,7 @@ const PokerPersonalityQuiz = () => {
   
   // Show proper loading state
   if (authLoading || (checkingResults && !resultCheckComplete)) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-amber-50 to-amber-100">
-        <div className="animate-spin h-10 w-10 border-4 border-amber-400 border-t-transparent rounded-full"></div>
-        <p className="mt-4 text-gray-600">
-          {checkingResults ? "Checking your saved results..." : "Loading..."}
-        </p>
-      </div>
-    );
+    return <LoadingSpinner message={checkingResults ? "Checking your saved results..." : "Loading..."} />;
   }
   
   const currentQuestion = quizQuestions[currentQuestionIndex];
@@ -230,3 +233,4 @@ const PokerPersonalityQuiz = () => {
 };
 
 export default PokerPersonalityQuiz;
+
